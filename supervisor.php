@@ -1,48 +1,16 @@
 <!DOCTYPE html>
 <html lang="th">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>แบบบันทึกข้อมูลนิเทศ (ส่วนที่ 2)</title>
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    
-    <style>
-        body { background-color: #f4f7f6; }
-        
-        /* ใช้ card เป็น container หลักสำหรับจัดกึ่งกลาง */
-        .main-card {
-            max-width: 800px; /* กำหนดความกว้างสูงสุด */
-            margin: 40px auto; /* จัดกึ่งกลางในแนวนอนและเว้นระยะขอบบน-ล่าง */
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); 
-            border: none; /* ลบขอบ card ดั้งเดิม */
-        }
-        
-        .form-header { 
-            background-color: #007bff; 
-            color: white; 
-            padding: 15px; 
-            font-size: 20px; 
-            border-top-left-radius: 5px;
-            border-top-right-radius: 5px;
-        }
+    <link rel="stylesheet" href="styles.css">
 
-        /* สไตล์กรอบสีแดง (ค้นหา) */
-        .search-field { border: 2px solid rgb(124, 124, 236) !important; }
-        /* สไตล์กรอบสีเหลือง (แสดงผล) - ใช้ Bootstrap background color */
-        .display-field { border: 2px solid rgb(124, 124, 236) !important; background-color: #ffffff !important; }
-        
-        .submit-button {
-            background-color: #28a745;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-        }
-    </style>
 </head>
+
 <body>
 
     <div class="main-card card">
@@ -62,34 +30,20 @@
 
                 <div class="col-md-6">
                     <label for="p_id" class="form-label fw-bold">เลขบัตรประจำตัวประชาชน</label>
-                    <input type="text" id="p_id" class="form-control display-field" placeholder="เลขบัตรประจำตัวประชาชน 13 หลัก" readonly>
+                    <input type="text" id="p_id" class="form-control display-field" placeholder="--" readonly>
                 </div>
 
                 <div class="col-md-6">
                     <label for="agency" class="form-label fw-bold">สังกัด</label>
-                    <input type="text" id="agency" class="form-control display-field" placeholder="สำนักงานเขตพื้นที่การศึกษา" readonly>
+                    <input type="text" id="agency" class="form-control display-field" placeholder="--" readonly>
                 </div>
 
                 <div class="col-md-6">
                     <label for="position" class="form-label fw-bold">ตำแหน่ง</label>
-                    <input type="text" id="position" class="form-control display-field" placeholder="ตำแหน่ง" readonly>
+                    <input type="text" id="position" class="form-control display-field" placeholder="--" readonly>
                 </div>
             </div>
         </div>
-        
-        <div class="assessment-section card-footer bg-white">
-            <p class="fw-bold mb-2">โปรดเลือกแบบฟอร์มสำหรับการประเมิน</p>
-            <div class="form-check mb-2">
-                <input type="radio" class="form-check-input" id="form1" name="assessment_form" value="form1" checked>
-                <label class="form-check-label" for="form1">แบบนิเทศการจัดการเรียนรู้และการจัดการชั้นเรียน</label>
-            </div>
-            <div class="form-check mb-4">
-                <input type="radio" class="form-check-input" id="form2" name="assessment_form" value="form2">
-                <label class="form-check-label" for="form2">แบบกรอกข้อมูลนิเทศตามนโยบายและจุดเน้นของสำนักงานเขตพื้นที่การศึกษา</label>
-            </div>
-            <button type="submit" class="submit-button btn btn-success">บันทึก</button>
-        </div>
-    </div>
 
     <script>
     // ... โค้ด JavaScript เดิม (ไม่จำเป็นต้องแก้ไข) ...
@@ -97,7 +51,7 @@
         // ... (โค้ดเดิม)
         const selectElement = document.getElementById('supervisor_name');
         
-        fetch('fetch_personnel.php?action=get_names')
+        fetch('fetch_supervisor.php?action=get_names')
             .then(response => response.json())
             .then(names => {
                 names.forEach(name => {
@@ -123,7 +77,7 @@
         positionField.value = '';
 
         if (selectedName) {
-            fetch(`fetch_personnel.php?full_name=${encodeURIComponent(selectedName)}`) 
+            fetch(`fetch_supervisor.php?full_name=${encodeURIComponent(selectedName)}`) 
                 .then(response => response.json())
                 .then(result => {
                     if (result.success) {
