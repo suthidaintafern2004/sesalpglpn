@@ -1,5 +1,7 @@
 body { 
-    background-color: #f4f7f6; 
+    background-color: #f4f7f6; /* เดิมจาก styles.css */
+    /* ถูกแทนที่/แก้ไขด้วย #feee91 ในไฟล์ kpi_form.php แต่เราใช้ #feee91 ที่เป็นสีจาก kpi_form.php เพื่อให้เหมือนหน้าเว็บ */
+    background-color: #feee91; 
 }
 
 /* ใช้ card เป็น container หลักสำหรับจัดกึ่งกลาง */
@@ -38,4 +40,47 @@ body {
     border-radius: 4px;
     cursor: pointer;
     font-size: 16px;
+}
+
+/* ****************************************************** */
+/* โค้ดที่ดึงมาจาก <style> ใน kpi_form.php เริ่มต้นที่นี่ */
+/* ****************************************************** */
+
+.container {
+    max-width: 720px;
+}
+
+.card {
+    border-radius: 8px;
+    border: 1px solid #dadce0;
+    box-shadow: none;
+}
+
+.section-header {
+    background-color: #ffffff;
+    border-top: 10px solid #3a8fb7;
+    border-radius: 8px;
+    padding: 20px;
+}
+
+.form-label-question {
+    font-weight: 500;
+    color: #202124;
+    font-size: 1.1rem;
+}
+
+.form-check-label {
+    color: #5f6368;
+}
+
+/* สไตล์ hover ของปุ่ม */
+.btn-hover-blue:hover {
+    background-color: #0d6efd; 
+    border-color: #0d6efd; 
+}
+
+/* เพิ่ม transition เพื่อให้สีเปลี่ยนแบบ "นุ่มนวล" */
+.btn-hover-blue {
+    transition: background-color 0.2s ease-in-out,
+      border-color 0.2s ease-in-out;
 }
