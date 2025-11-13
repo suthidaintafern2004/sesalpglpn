@@ -2,14 +2,18 @@
 // 1. นำเข้าไฟล์เชื่อมต่อฐานข้อมูล
 require_once 'db_connect.php'; 
 
-// 2. ส่วนเลือกข้อมูลผู้นิเทศ (เปิด form tag)
+// ⭐️ เพิ่มแท็ก FORM ครอบทุกส่วน ⭐️
+echo '<form method="POST" action="summary.php">'; 
+
+// 2. ส่วนเลือกข้อมูลผู้นิเทศ (ต้องไม่มีแท็ก <form> ในไฟล์นี้แล้ว)
 require_once 'supervisor.php'; 
 
-// 3. ส่วนเลือกข้อมูลผู้รับนิเทศ (มีปุ่มบันทึกและปิด form tag)
+// 3. ส่วนเลือกข้อมูลผู้รับนิเทศ (ต้องไม่มีแท็ก <form> ในไฟล์นี้แล้ว)
 require_once 'teacher.php'; 
 
-// // 4. ส่วนเลือกแบบฟรอมนิเทศ (นำออกตามโครงสร้างใหม่)
-// require_once 'form_selector.php'; 
+// ⭐️ เพิ่มแท็ก FORM ปิด ⭐️
+echo '</form>'; 
+
 ?>
     </div> <script>
         // ⭐️ เรียกฟังก์ชัน populateNameDropdown เมื่อหน้าโหลดเสร็จ (จาก supervisor.php)

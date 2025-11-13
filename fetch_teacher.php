@@ -1,44 +1,43 @@
 <?php
-// fetch_teacher.php
+// fetch_teacher.php (ฉบับแก้ไข: ใช้ CONCAT ค้นหาชื่อเต็ม)
 
 header('Content-Type: application/json');
-require_once 'db_connect.php'; // ใช้ require_once สำหรับไฟล์เชื่อมต่อ DB
+require_once 'db_connect.php'; 
 
 // ----------------------------------------------------------------------
 // โหมด 1: ดึงข้อมูลเฉพาะบุคคลเมื่อเลือกชื่อ (full_name)
 // ----------------------------------------------------------------------
 if (isset($_GET['full_name'])) {
-    $full_name = $_GET['full_name'];
-    $full_name_parts = explode(' ', $full_name);
     
-    // ⭐️ ใช้ Fname และ Lname ในการค้นหาจากชื่อเต็ม (สมมติว่าชื่อเต็มคือ PrefixName Fname Lname)
-    // ใช้ตำแหน่งที่ 1 (ชื่อ) และสุดท้าย (นามสกุล) ในการค้นหา
-    $teacher_fname = $conn->real_escape_string($full_name_parts[1]); 
-    $teacher_lname = $conn->real_escape_string(end($full_name_parts)); 
+    $full_name = trim($_GET['full_name']);
+    $full_name_search = $conn->real_escape_string($full_name); 
     
-    // ⭐️ SQL: ใช้ t_pid, adm_name, learning_group (ชื่อคอลัมน์จากตาราง teacher)
+    // ⭐️ FIX SQL: ค้นหาจากชื่อเต็มที่ถูก CONCAT() ในฐานข้อมูล
+    // ตรวจสอบให้แน่ใจว่าการ CONCAT นี้ตรงกับที่คุณใช้สร้าง Datalist ใน teacher.php
     $sql = "SELECT t_pid, adm_name, learning_group FROM teacher 
-            WHERE Fname = '$teacher_fname' AND Lname = '$teacher_lname'";
+            WHERE CONCAT(IFNULL(PrefixName, ''), ' ', Fname, ' ', Lname) = '$full_name_search'";
             
     $result = $conn->query($sql);
 
     if ($result->num_rows > 0) {
         $row = $result->fetch_assoc();
-        // ⭐️ ส่งคีย์ที่ตรงกับ ID ใน HTML (t_pid, adm_name, learning_group)
+        
+        // ส่งคีย์ที่ตรงกับ ID ใน teacher.php (t_pid, adm_name, learning_group)
         echo json_encode(['success' => true, 'data' => [
-            't_pid' => $row['t_pid'], 
+            't_pid' => $row['t_pid'], // คีย์สำหรับเลขบัตรประชาชน
             'adm_name' => $row['adm_name'], 
             'learning_group' => $row['learning_group']
         ]]);
+        
     } else {
-        echo json_encode(['success' => false, 'message' => 'ไม่พบข้อมูลครูคนนี้']);
+        echo json_encode(['success' => false, 'message' => 'ไม่พบข้อมูลครูคนนี้ในระบบ']);
     }
 
 // ----------------------------------------------------------------------
 // โหมด 2: ดึงรายชื่อเต็มสำหรับ Datalist (action=get_names)
 // ----------------------------------------------------------------------
 } else if (isset($_GET['action']) && $_GET['action'] == 'get_names') {
-    // ⭐️ ใช้ CONCAT() เพื่อรวมคำนำหน้า ชื่อ และนามสกุล
+    // ใช้ CONCAT() เพื่อรวมคำนำหน้า ชื่อ และนามสกุล (โค้ดส่วนนี้ถูกต้องแล้ว)
     $sql_names = "SELECT CONCAT(IFNULL(PrefixName, ''), ' ', Fname, ' ', Lname) AS full_name_display 
                   FROM teacher 
                   ORDER BY Fname ASC"; 
@@ -53,9 +52,10 @@ if (isset($_GET['full_name'])) {
     }
     echo json_encode($names);
 
+// ----------------------------------------------------------------------
+// โหมดเริ่มต้น/ไม่ถูกต้อง
+// ----------------------------------------------------------------------
 } else {
-    echo json_encode(['success' => false, 'message' => 'ไม่มีพารามิเตอร์การค้นหา']);
+    echo json_encode(['success' => false, 'message' => 'รูปแบบการเรียกข้อมูลไม่ถูกต้อง']);
 }
-
-$conn->close();
 ?>

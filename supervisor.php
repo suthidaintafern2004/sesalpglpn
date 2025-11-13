@@ -14,7 +14,7 @@
 
     <div class="main-card card">
         <div class="form-header card-header text-center">
-            <i class="fas fa-file-alt"></i> <span class="fw-bold">แบบบันทึกข้อมูลนิเทศ</span>
+            <i class="fas fa-file-alt"></i> <span class="fw-bold">แบบบันทึกข้อมูลผู้นิเทศ และ ผู้รับนิเทศ</span>
         </div>
         
         <form method="POST" action="summary.php"> 
