@@ -1,14 +1,14 @@
-
 <?php
 // ไฟล์: supervision_report.php
 require_once 'db_connect.php';
 
 // ตรวจสอบค่า session_id
-if (!isset($_GET['session_id']) || empty($_GET['session_id'])) {
+// ⭐️ แก้ไข: เปลี่ยนจาก $_GET เป็น $_POST ⭐️
+if (!isset($_POST['session_id']) || empty($_POST['session_id'])) {
     die("ไม่พบรหัสการนิเทศ");
 }
 
-$session_id = intval($_GET['session_id']);
+$session_id = intval($_POST['session_id']); // ⭐️ แก้ไข: เปลี่ยนจาก $_GET เป็น $_POST ⭐️
 
 // 1. ดึงข้อมูลการนิเทศ (Supervision Info + Teacher + Supervisor)
 // ใช้ JOIN เพื่อดึงข้อมูลจากหลายตารางพร้อมกัน
@@ -89,12 +89,84 @@ while ($row = $result_sugg->fetch_assoc()) {
     <meta charset="UTF-8">
     <title>รายงานผลการนิเทศ</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <!-- เพิ่ม Google Fonts 'Sarabun' -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Sarabun', sans-serif;
+        }
+
+        .report-container {
+            max-width: 900px;
+            margin: 30px auto;
+            background: #fff;
+            padding: 40px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
+        .header-title {
+            color: #0d6efd;
+            border-bottom: 2px solid #0d6efd;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .info-box {
+            background-color: #eef6ff;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border: 1px solid #cce5ff;
+        }
+
+        .table-kpi th {
+            background-color: #f8f9fa;
+        }
+
+        .score-badge {
+            font-size: 0.9rem;
+            padding: 5px 10px;
+            border-radius: 20px;
+        }
+
+        .badge-3 {
+            background-color: #198754;
+            color: white;
+        }
+
+        /* ดีมาก */
+        .badge-2 {
+            background-color: #ffc107;
+            color: black;
+        }
+
+        /* พอใช้ */
+        .badge-1 {
+            background-color: #e83e8c; /* Pink */
+            color: white;
+        }
+
+        /* ต้องปรับปรุง */
+        .badge-0 {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        /* ปรับปรุง */
+        
+        @media print {
+            .no-print {
+                display: none;
+            }
+
+            .report-container {
+                box-shadow: none;
+                margin: 0;
+                padding: 0;
+            }
+        }
+    </style>
 </head>
 
 <body>
@@ -113,10 +185,10 @@ while ($row = $result_sugg->fetch_assoc()) {
                     <strong>ชื่อ-นามสกุล:</strong> <?php echo $info['t_prefix'] . $info['t_fname'] . ' ' . $info['t_lname']; ?>
                 </div>
                 <div class="col-md-6">
-                    <strong>ตำแหน่ง/วิทยฐานะ:</strong> <?php echo $info['t_position']; ?>
+                    <strong>สังกัด (โรงเรียน):</strong> <?php echo $info['t_school']; ?>
                 </div>
                 <div class="col-md-6">
-                    <strong>สังกัด (โรงเรียน):</strong> <?php echo $info['t_school']; ?>
+                    <strong>ตำแหน่ง/วิทยฐานะ:</strong> <?php echo $info['t_position']; ?>
                 </div>
                 <div class="col-md-6">
                     <strong>กลุ่มสาระการเรียนรู้:</strong> <?php echo $info['learning_group'] ?? '-'; ?>
@@ -166,12 +238,16 @@ while ($row = $result_sugg->fetch_assoc()) {
                                     <td class="text-center">
                                         <?php
                                         $score = $q['rating_score'];
-                                        $class = 'badge-2'; // Default
-                                        if ($score == 4) $class = 'badge-4';
-                                        elseif ($score == 3) $class = 'badge-3';
-                                        elseif ($score == 1) $class = 'badge-1';
+                                        $class = 'badge-2'; // พอใช้ (สีเหลือง)
+                                        if ($score == 3) $class = 'badge-3';      // ดีมาก (สีเขียว)
+                                        elseif ($score == 1) $class = 'badge-1';  // ปรับปรุง (สีชมพู)
+                                        elseif ($score == 0) $class = 'badge-0';  // ต้องปรับปรุง (สีแดง)
+                                        $class = 'badge-2'; // Default to พอใช้ (สีเหลือง) for score 2
+                                        if ($score == 3) $class = 'badge-3'; // ดีมาก (สีเขียว)
+                                        elseif ($score == 1) $class = 'badge-1'; // พอใช้ (สีชมพู)
+                                        elseif ($score == 0) $class = 'badge-0'; // ปรับปรุง (สีแดง)
                                         ?>
-                                        <span class="badge score-badge <?php echo $class; ?>"><?php echo $score; ?></span>
+                                        <span class="badge score-badge <?php echo $class; ?>"><?php echo htmlspecialchars($score); ?></span>
                                     </td>
                                     <td><?php echo !empty($q['comment']) ? nl2br(htmlspecialchars($q['comment'])) : '-'; ?></td>
                                 </tr>
@@ -198,7 +274,6 @@ while ($row = $result_sugg->fetch_assoc()) {
                 </table>
             </div>
 
-            <!-- ส่วนแสดงข้อเสนอแนะภาพรวม (เพิ่มใหม่) -->
             <?php if (!empty($info['overall_suggestion'])): ?>
             <div class="card mt-4 border-info">
                 <div class="card-header bg-info text-dark fw-bold">
@@ -211,8 +286,8 @@ while ($row = $result_sugg->fetch_assoc()) {
             <?php endif; ?>
 
             <div class="text-center mt-5 no-print">
-                <button onclick="window.print()" class="btn btn-secondary me-2"><i class="fas fa-print"></i> พิมพ์รายงาน</button>
-                <a href="index.php" class="btn btn-primary"><i class="fas fa-home"></i> กลับหน้าหลัก</a>
+                <a href="history.php" class="btn btn-secondary me-2"><i class="fas fa-list-alt"></i> กลับไปหน้าประวัติ</a>
+                <button onclick="window.print()" class="btn btn-secondary"><i class="fas fa-print"></i> พิมพ์รายงาน</button>
             </div>
 
         </div>

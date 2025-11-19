@@ -8,41 +8,44 @@ $results = [];
 
 // SQL พื้นฐานสำหรับดึงข้อมูล
 // ⭐️ ดึงข้อมูลที่จำเป็นตามภาพ: วันที่, ชื่อครู, โรงเรียน, ชื่อผู้นิเทศ, รายวิชา, เวลา, ปุ่มดูรายงาน
+// ⭐️ ปรับปรุง SQL: ใช้ Subquery เพื่อหาการนิเทศครั้งล่าสุดของแต่ละคน แล้วค่อย JOIN ข้อมูลที่เหลือ
 $sql = "SELECT
-            ss.id AS session_id,
-            ss.inspection_date,
-            ss.subject_name,
-            ss.inspection_time,
+            ss_latest.teacher_t_pid,
             CONCAT(t.PrefixName, t.fname, ' ', t.lname) AS teacher_full_name,
-            CONCAT(sp.PrefixName, sp.fname, ' ', sp.lname) AS supervisor_full_name,
+            t.adm_name AS teacher_position,
             s_school.SchoolName AS t_school
         FROM
-            supervision_sessions ss
+            (
+                SELECT 
+                    teacher_t_pid, 
+                    MAX(id) AS latest_session_id
+                FROM supervision_sessions
+                GROUP BY teacher_t_pid
+            ) AS latest_sessions
+        JOIN 
+            supervision_sessions ss_latest ON latest_sessions.latest_session_id = ss_latest.id
         LEFT JOIN
-            teacher t ON ss.teacher_t_pid = t.t_pid
+            teacher t ON ss_latest.teacher_t_pid = t.t_pid
         LEFT JOIN
             school s_school ON t.school_id = s_school.school_id
-        LEFT JOIN
-            supervisor sp ON ss.supervisor_p_id = sp.p_id";
+        ";
 
 $params = [];
 $types = '';
 
 // ⭐️ เงื่อนไขการค้นหา: จะทำการค้นหาก็ต่อเมื่อ $search_name ไม่ใช่ค่าว่างเท่านั้น ⭐️
 if (!empty($search_name)) {
+    // จัดการกับช่องว่างที่อาจมีหลายช่องติดกัน ให้เหลือเพียงช่องว่างเดียว
+    $normalized_search = preg_replace('/\s+/', ' ', $search_name);
     // กรณีมีการค้นหา: เพิ่ม WHERE clause
-    $search_term = "%" . $search_name . "%";
-    $sql .= " WHERE CONCAT(t.fname, ' ', t.lname) LIKE ? OR CONCAT(sp.fname, ' ', sp.lname) LIKE ?";
-    // เพิ่มการค้นหาจาก subject_name ด้วย
-    // $sql .= " WHERE CONCAT(t.fname, ' ', t.lname) LIKE ? OR CONCAT(sp.fname, ' ', sp.lname) LIKE ? OR ss.subject_name LIKE ?";
+    $search_term = "%" . $normalized_search . "%";
+    $sql .= " WHERE CONCAT(t.fname, ' ', t.lname) LIKE ? OR t.adm_name LIKE ?";
     $params = [$search_term, $search_term];
     $types = "ss";
-    // $params = [$search_term, $search_term, $search_term];
-    // $types = "sss";
 }
 
 // ⭐️ เรียงลำดับจากวันที่ล่าสุด ⭐️
-$sql .= " ORDER BY ss.inspection_date DESC, ss.id DESC";
+$sql .= " ORDER BY ss_latest.id DESC";
 
 
 // เตรียมและดำเนินการสอบถาม
@@ -93,7 +96,7 @@ $conn->close();
 
             <form method="GET" action="history.php" class="mb-4">
                 <div class="input-group">
-                    <input type="text" class="form-control" placeholder="ค้นหาด้วยชื่อครู หรือ ชื่อผู้นิเทศ..." name="search_name" value="<?php echo htmlspecialchars($search_name); ?>">
+                    <input type="text" class="form-control" placeholder="ค้นหาด้วยชื่อครู หรือ ตำแหน่ง..." name="search_name" value="<?php echo htmlspecialchars($search_name); ?>">
                     <button class="btn btn-primary" type="submit"><i class="fas fa-search"></i> ค้นหา</button>
                     <a href="history.php" class="btn btn-secondary" title="แสดงรายการทั้งหมด">
                         <i class="fas fa-redo"></i>
@@ -102,39 +105,42 @@ $conn->close();
                 <small class="form-text text-muted">หากไม่กรอกข้อมูลและกดปุ่ม 'ค้นหา' จะแสดงรายการทั้งหมด</small>
             </form>
 
+            <div class="text-end mb-3">
+                <a href="index.php" class="btn btn-success">
+                    <i class="fas fa-plus-circle"></i> บันทึกการนิเทศ
+                </a>
+            </div>
+
             <div class="table-responsive">
                 <table class="table table-striped table-hover table-custom align-middle">
                     <thead>
                         <tr>
-                            <th scope="col" class="text-center" style="width: 10%;">วันที่นิเทศ</th>
                             <th scope="col">ชื่อผู้รับนิเทศ</th>
                             <th scope="col">โรงเรียน</th>
-                            <th scope="col">ชื่อผู้นิเทศ</th>
-                            <th scope="col" style="width: 15%;">รายวิชา</th>
-                            <th scope="col" class="text-center" style="width: 10%;">จำนวนการนิเทศ</th>
-                            <th scope="col" class="text-center" style="width: 8%;">รายงาน</th>
+                            <th scope="col">ตำแหน่ง</th>
+                            <th scope="col" class="text-center" style="width: 10%;">เพิ่มเติม</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php if (empty($results)) : ?>
                             <tr>
-                                <td colspan="7" class="text-center text-danger fw-bold">
+                                <td colspan="4" class="text-center text-danger fw-bold">
                                     <?php echo !empty($search_name) ? "ไม่พบข้อมูลการนิเทศที่ตรงกับการค้นหา: \"" . htmlspecialchars($search_name) . "\"" : "ไม่พบประวัติการนิเทศที่บันทึกไว้ในระบบ"; ?>
                                 </td>
                             </tr>
                         <?php else : ?>
                             <?php foreach ($results as $row) : ?>
                                 <tr>
-                                    <td class="text-center"><?php echo date('d/m/Y', strtotime($row['inspection_date'])); ?></td>
                                     <td><?php echo htmlspecialchars($row['teacher_full_name']); ?></td>
                                     <td><?php echo htmlspecialchars($row['t_school']); ?></td>
-                                    <td><?php echo htmlspecialchars($row['supervisor_full_name']); ?></td>
-                                    <td><?php echo htmlspecialchars($row['subject_name']); ?></td>
-                                    <td class="text-center"><?php echo substr($row['inspection_time'], 0, 5); ?></td> 
+                                    <td><?php echo htmlspecialchars($row['teacher_position']); ?></td>
                                     <td class="text-center">
-                                        <a href="supervision_report.php?session_id=<?php echo $row['session_id']; ?>" class="btn btn-sm btn-outline-primary" title="ดูรายงานฉบับเต็ม">
-                                            <i class="fas fa-file-alt"></i>
-                                        </a>
+                                        <form method="POST" action="session_details.php" style="display:inline;">
+                                            <input type="hidden" name="teacher_pid" value="<?php echo $row['teacher_t_pid']; ?>">
+                                            <button type="submit" class="btn btn-sm btn-info" title="ดูประวัติการนิเทศทั้งหมดของครูท่านนี้">
+                                                <i class="fas fa-search-plus"></i>
+                                            </button>
+                                        </form>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>
@@ -143,9 +149,6 @@ $conn->close();
                 </table>
             </div>
 
-            <div class="text-center mt-4">
-                <a href="index.php" class="btn btn-secondary"><i class="fas fa-home"></i> กลับหน้าหลัก</a>
-            </div>
         </div>
     </div>
 
