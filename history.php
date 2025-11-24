@@ -113,13 +113,16 @@ $conn->close();
 
             <!-- ⭐️ 2. เปลี่ยนปุ่มตามสถานะการล็อกอิน -->
             <?php if (isset($_SESSION['is_logged_in']) && $_SESSION['is_logged_in'] === true): ?>
-                <div class="d-flex justify-content-between align-items-center mb-3">
+                <div class="d-flex justify-content-end align-items-center mb-3 gap-2">
                     <!-- ส่วนของผู้นิเทศ (เมื่อล็อกอิน) -->
-                    <a href="logout.php" class="btn btn-danger">
-                        <i class="fas fa-sign-out-alt"></i> ออกจากระบบ
-                    </a>
                     <a href="index.php" class="btn btn-success">
                         <i class="fas fa-plus-circle"></i> บันทึกการนิเทศ
+                    </a>
+                    <a href="satisfaction_dashboard.php" class="btn btn-info">
+                        <i class="fas fa-chart-pie"></i> สรุปผลความพึงพอใจ
+                    </a>
+                    <a href="logout.php" class="btn btn-danger">
+                        <i class="fas fa-sign-out-alt"></i> ออกจากระบบ
                     </a>
                 </div>
             <?php else: ?>

@@ -112,7 +112,7 @@ $conn->close();
                             <th scope="col" style="width: 5%;">ครั้งที่</th>
                             <th scope="col" style="width: 20%;">ผู้นิเทศ</th>
                             <th scope="col" style="width: 12%;">รายงาน</th>
-                            <?php if (!$is_supervisor): // ⭐️ ถ้าไม่ใช่ผู้นิเทศ ให้แสดงคอลัมน์ประเมิน ?>
+                            <?php if (!$is_supervisor) : // ⭐️ ถ้าไม่ใช่ผู้นิเทศ ให้แสดงคอลัมน์ประเมิน ?>
                                 <th scope="col" style="width: 12%;">ประเมิน</th>
                             <?php endif; ?>
                             <th scope="col" style="width: 12%;">เกียรติบัตร</th>
@@ -122,7 +122,7 @@ $conn->close();
                         <?php if (empty($results)) : ?>
                             <tr>
                                 <?php // ⭐️ ปรับ colspan ตามการแสดงผล ?>
-                                <td colspan="<?php echo $is_supervisor ? '5' : '6'; ?>" class="text-center text-danger fw-bold">ไม่พบประวัติการนิเทศสำหรับครูท่านนี้</td>
+                                <td colspan="<?php echo $is_supervisor ? '4' : '6'; ?>" class="text-center text-danger fw-bold">ไม่พบประวัติการนิเทศสำหรับครูท่านนี้</td>
                             </tr>
                         <?php else : ?>
                             <?php foreach ($results as $row) : ?>
@@ -137,7 +137,7 @@ $conn->close();
                                             <button type="submit" class="btn btn-sm btn-primary" title="ดูรายงานผลการนิเทศ"><i class="fas fa-file-alt"></i> ดูรายงาน</button>
                                         </form>
                                     </td>
-                                    <?php if (!$is_supervisor): // ⭐️ ถ้าไม่ใช่ผู้นิเทศ ให้แสดงคอลัมน์ประเมิน ?>
+                                    <?php if (!$is_supervisor) : // ⭐️ ถ้าไม่ใช่ผู้นิเทศ ให้แสดงคอลัมน์ประเมิน ?>
                                         <td>
                                             <?php // ปุ่มประเมินจะแสดงเมื่อไม่ใช่ผู้นิเทศเท่านั้น ?>
                                             <?php if ($row['satisfaction_submitted'] == 0): // ถ้ายังไม่ประเมิน (0) ให้แสดงปุ่มประเมิน ?>
