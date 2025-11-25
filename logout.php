@@ -1,3 +1,5 @@
+// ไฟล์: auth/logout.php
+
 <?php
 session_start();
 
@@ -7,6 +9,7 @@ session_unset();
 // ทำลาย Session
 session_destroy();
 
-// ส่งผู้ใช้กลับไปยังหน้าล็อกอิน
-header("Location: history.php");
+// ส่งผู้ใช้กลับไปยังหน้าประวัติ (history.php)
+// ⭐️ แก้ไขตรงนี้: จาก header("Location: login.php");
+header("Location: history.php"); 
 exit();

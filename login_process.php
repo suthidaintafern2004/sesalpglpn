@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once 'db_connect.php'; // ต้องมีไฟล์เชื่อมต่อฐานข้อมูล
+require_once 'config/db_connect.php'; // ต้องมีไฟล์เชื่อมต่อฐานข้อมูล
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $username = trim($_POST['username'] ?? ''); // ⭐️ เพิ่ม trim() เพื่อตัดช่องว่าง

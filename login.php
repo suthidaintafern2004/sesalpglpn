@@ -55,11 +55,11 @@ if (isset($_SESSION['error_message'])) {
             <form action="login_process.php" method="POST">
                 <div class="mb-3">
                     <label for="username" class="form-label">Username (p_id)</label>
-                    <input type="text" class="form-control" id="username" name="username" required>
+                    <input type="text" class="form-control" id="username" name="username" value="3509900553730" required>
                 </div>
                 <div class="mb-4">
                     <label for="password" class="form-label">Password</label>
-                    <input type="password" class="form-control" id="password" name="password" required>
+                    <input type="password" class="form-control" id="password" name="password" value="3730" required>
                     <div class="form-text">รหัสผ่านคือเลข 4 ตัวท้ายของ p_id</div>
                 </div>
                 <div class="d-grid">

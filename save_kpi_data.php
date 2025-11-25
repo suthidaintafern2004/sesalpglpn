@@ -3,11 +3,11 @@
 session_start();
 require_once 'db_connect.php';
 
-function redirect_with_message($message, $type = 'danger')
-{
+// ⭐️ ฟังก์ชันสำหรับ Redirect พร้อมข้อความ
+function redirect_with_message($message, $type = 'danger') {
     $_SESSION['message'] = $message;
     $_SESSION['message_type'] = $type;
-    header("Location: kpi_form.php");
+    header("Location: summary.php"); // กลับไปหน้าฟอร์มหลัก
     exit();
 }
 
@@ -32,7 +32,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $ratings = $_POST['ratings'] ?? [];
     $comments = $_POST['comments'] ?? [];
     $indicator_suggestions = $_POST['indicator_suggestions'] ?? [];
-    $overall_suggestion = trim($_POST['overall_suggestion'] ?? ''); // ⭐️ รับข้อมูลข้อเสนอแนะภาพรวม
+    $overall_suggestion = trim($_POST['overall_suggestion'] ?? '');
 
     if (empty($supervisor_p_id) || empty($teacher_t_pid)) {
         redirect_with_message("ข้อมูลไม่ครบถ้วน");
@@ -47,18 +47,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     try {
         // 1. บันทึกข้อมูล Session ลงในตาราง supervision_sessions พร้อมฟิลด์ใหม่
         $sql_session = "INSERT INTO supervision_sessions 
-                        (supervisor_p_id, teacher_t_pid, subject_code, subject_name, inspection_time, inspection_date) 
-                        VALUES (?, ?, ?, ?, ?, ?)";
+                        (supervisor_p_id, teacher_t_pid, subject_code, subject_name, inspection_time, inspection_date, overall_suggestion) 
+                        VALUES (?, ?, ?, ?, ?, ?, ?)";
 
         $stmt_session = $conn->prepare($sql_session);
-        $stmt_session->bind_param(
-            "ssssis", // ลบ s ตัวสุดท้ายสำหรับ overall_suggestion ออก
+        $stmt_session->bind_param( // เพิ่ม s สำหรับ overall_suggestion
+            "ssssiss",
             $supervisor_p_id,
             $teacher_t_pid,
             $subject_code,
             $subject_name,
             $inspection_time,
-            $supervision_date
+            $supervision_date,
+            $overall_suggestion // เพิ่ม overall_suggestion ในการ bind
         );
         $stmt_session->execute();
         $session_id = $conn->insert_id;
@@ -91,12 +92,68 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         unset($_SESSION['inspection_data']);
 
+        // --- 4. ส่วนจัดการการอัพโหลดรูปภาพ (เพิ่มเข้ามาใหม่) ---
+        $uploadDir = 'uploads/';
+        $maxUploads = 2;
+
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0755, true);
+        }
+
+        if (isset($_FILES['image_upload']) && !empty(array_filter($_FILES['image_upload']['name']))) {
+            
+            // นับจำนวนรูปที่มีอยู่แล้วสำหรับ session นี้
+            $stmt_count = $conn->prepare("SELECT COUNT(*) as count FROM images WHERE session_id = ?");
+            $stmt_count->bind_param("i", $session_id);
+            $stmt_count->execute();
+            $currentImageCount = $stmt_count->get_result()->fetch_assoc()['count'];
+            $stmt_count->close();
+
+            $files = $_FILES['image_upload'];
+            $filesToUploadCount = count(array_filter($files['name']));
+
+            if ($currentImageCount + $filesToUploadCount > $maxUploads) {
+                redirect_with_message("อัปโหลดรูปภาพเกินจำนวนที่กำหนด (สูงสุด {$maxUploads} รูป)", 'warning');
+            } else {
+                $insertStmt = $conn->prepare("INSERT INTO images (session_id, file_name) VALUES (?, ?)");
+                // ⭐️ FIX: ตรวจสอบว่า prepare statement สำเร็จหรือไม่
+                if ($insertStmt === false) {
+                    // หาก prepare ล้มเหลว ให้ rollback และแสดงข้อผิดพลาด
+                    redirect_with_message("เกิดข้อผิดพลาดในการเตรียมคำสั่ง SQL สำหรับอัปโหลดรูปภาพ: " . $conn->error);
+                }
+
+                foreach ($files['name'] as $key => $name) {
+                    if ($files['error'][$key] === UPLOAD_ERR_OK) {
+                        $tmpName = $files['tmp_name'][$key];
+                        
+                        $fileInfo = getimagesize($tmpName);
+                        $allowedTypes = [IMAGETYPE_JPEG, IMAGETYPE_PNG, IMAGETYPE_GIF];
+
+                        if ($fileInfo && in_array($fileInfo[2], $allowedTypes)) {
+                            $extension = pathinfo($name, PATHINFO_EXTENSION);
+                            $newFileName = uniqid('img_', true) . '.' . strtolower($extension);
+                            $destination = $uploadDir . $newFileName;
+
+                            if (move_uploaded_file($tmpName, $destination)) {
+                                $insertStmt->bind_param("is", $session_id, $newFileName);
+                                $insertStmt->execute();
+                            }
+                        }
+                    }
+                }
+                $insertStmt->close();
+            }
+        }
+
         // เปลี่ยนเส้นทางไปยังหน้าประวัติเพื่อแสดงข้อมูลทั้งหมด
         header("Location: history.php");
         exit();
+
     } catch (Exception $e) {
         $conn->rollback();
         redirect_with_message("เกิดข้อผิดพลาด: " . $e->getMessage());
     }
-    $conn->close();
 }
+
+$conn->close(); // ⭐️ FIX: ย้ายการปิด connection มาไว้ท้ายสุดของไฟล์
+?>

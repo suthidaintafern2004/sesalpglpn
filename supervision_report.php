@@ -1,14 +1,13 @@
 <?php
 // ไฟล์: supervision_report.php
+session_start(); // ⭐️ เริ่ม session เพื่อใช้แสดงข้อความ
 require_once 'db_connect.php';
 
 // ตรวจสอบค่า session_id
-// ⭐️ แก้ไข: เปลี่ยนจาก $_GET เป็น $_POST ⭐️
-if (!isset($_POST['session_id']) || empty($_POST['session_id'])) {
+if (!isset($_REQUEST['session_id']) || empty($_REQUEST['session_id'])) { // ⭐️ ใช้ $_REQUEST เพื่อรับทั้ง GET และ POST
     die("ไม่พบรหัสการนิเทศ");
 }
-
-$session_id = intval($_POST['session_id']); // ⭐️ แก้ไข: เปลี่ยนจาก $_GET เป็น $_POST ⭐️
+$session_id = intval($_REQUEST['session_id']);
 
 // 1. ดึงข้อมูลการนิเทศ (Supervision Info + Teacher + Supervisor)
 // ใช้ JOIN เพื่อดึงข้อมูลจากหลายตารางพร้อมกัน

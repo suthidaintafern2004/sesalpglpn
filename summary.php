@@ -1,6 +1,7 @@
 <?php
 // ไฟล์: summary.php
 session_start();
+require_once 'db_connect.php'; // ⭐️ เพิ่มการเชื่อมต่อ DB สำหรับโหมดแก้ไข
 
 // ----------------------------------------------------------------
 // A) ตรวจสอบการส่งข้อมูลจากหน้า index.php
@@ -41,7 +42,7 @@ if (!$inspection_data) {
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>แบบฟอร์มประเมิน KPI</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="assets/css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 </head>
 <body>
@@ -58,7 +59,7 @@ if (!$inspection_data) {
             <?php else: ?>
                 <?php
                 // รวมฟอร์ม KPI ทั้งหมดเข้ามาแสดงผลในหน้านี้
-                include 'kpi_form.php';
+                include 'forms/kpi_form.php';
                 ?>
             <?php endif; ?>
         </div>

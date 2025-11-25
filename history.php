@@ -5,7 +5,7 @@
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
-require_once 'db_connect.php';
+require_once 'config/db_connect.php';
 
 // ตรวจสอบค่า search_name: ถ้ามีค่าเข้ามา ให้ Trim ถ้าไม่มีค่า (หรือเข้าหน้าครั้งแรก) ให้เป็นค่าว่าง
 $search_name = isset($_GET['search_name']) ? trim($_GET['search_name']) : '';
@@ -118,7 +118,7 @@ $conn->close();
                     <a href="index.php" class="btn btn-success">
                         <i class="fas fa-plus-circle"></i> บันทึกการนิเทศ
                     </a>
-                    <a href="satisfaction_dashboard.php" class="btn btn-info">
+                    <a href="graph/satisfaction_dashboard.php" class="btn btn-info">
                         <i class="fas fa-chart-pie"></i> สรุปผลความพึงพอใจ
                     </a>
                     <a href="logout.php" class="btn btn-danger">

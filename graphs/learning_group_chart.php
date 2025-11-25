@@ -4,12 +4,12 @@
 ?>
 <div class="card shadow-sm mt-4">
     <div class="card-header card-header-custom text-center" style="background-color: #ffc107;">
-        <h2 class="h4 mb-0"><i class="fas fa-book-open"></i> สรุปจำนวนการนิเทศตามกลุ่มสาระการเรียนรู้</h2>
+        <h2 class="h4 mb-0"><i class="fas fa-book-open"></i> สรุปจำนวนครูที่ได้รับการนิเทศตามกลุ่มสาระ</h2>
     </div>
     <div class="card-body p-4">
         <div class="row align-items-center">
             <div class="col-lg-6">
-                <h5 class="card-title text-center mb-3">กราฟแสดงจำนวนครั้งที่ได้รับการนิเทศ</h5>
+                <h5 class="card-title text-center mb-3">กราฟแสดงจำนวนครูที่ได้รับการนิเทศ (คน)</h5>
                 <canvas id="learningGroupChart"></canvas>
             </div>
             <div class="col-lg-6">
@@ -19,14 +19,14 @@
                         <thead class="table-warning">
                             <tr class="text-center">
                                 <th scope="col">กลุ่มสาระการเรียนรู้</th>
-                                <th scope="col">จำนวนครั้งที่นิเทศ</th>
+                                <th scope="col">จำนวนครู (คน)</th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php foreach ($lg_supervision_data as $data): ?>
                                 <tr>
-                                    <td><?php echo htmlspecialchars($data['name'] ?? ''); ?></td>
-                                    <td class="text-center"><?php echo $data['supervision_count'] ?? 0; ?></td>
+                                    <td><?php echo htmlspecialchars($data['learning_group'] ?? ''); ?></td>
+                                    <td class="text-center"><?php echo $data['supervised_teacher_count'] ?? 0; ?></td>
                                 </tr>
                             <?php endforeach; ?>
                         </tbody>
@@ -52,7 +52,7 @@ document.addEventListener('DOMContentLoaded', function () {
         data: {
             labels: chartLabels,
             datasets: [{
-                label: 'จำนวนครั้งที่นิเทศ',
+                label: 'จำนวนครูที่ได้รับการนิเทศ (คน)',
                 data: chartValues,
                 backgroundColor: backgroundColors,
                 borderColor: backgroundColors.map(color => color.replace('0.7', '1')),

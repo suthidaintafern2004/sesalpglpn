@@ -64,6 +64,12 @@
     </div>
 </div>
 
+<?php
+// เตรียมข้อมูล response_count สำหรับใช้ใน JavaScript
+$response_counts = array_column($dashboard_data, 'response_count');
+$js_response_counts = json_encode($response_counts);
+?>
+
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     // --- กราฟสรุปผลความพึงพอใจ (Pie Chart) ---
@@ -83,7 +89,21 @@ document.addEventListener('DOMContentLoaded', function () {
         options: {
             responsive: true,
             plugins: {
-                legend: { display: false },
+                legend: { 
+                    display: false 
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            let label = context.dataset.label || '';
+                            if (label) {
+                                label += ': ';
+                            }
+                            label += context.formattedValue; // คะแนนเฉลี่ย
+                            return label + ' (ผู้ตอบ: ' + <?php echo $js_response_counts; ?>[context.dataIndex] + ' คน)';
+                        }
+                    }
+                },
                 datalabels: {
                     // ใช้ formatter เพื่อดึงเฉพาะเลขข้อจาก label (เช่น "1. ความรวดเร็ว" จะได้ "1")
                     formatter: (value, context) => {

@@ -45,7 +45,7 @@ $_SESSION['satisfaction_data'] = [
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>แบบประเมินความพึงพอใจ</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 </head>
 <body>
@@ -62,7 +62,7 @@ $_SESSION['satisfaction_data'] = [
             <?php else: ?>
                 <?php
                 // 4. รวมฟอร์มประเมินความพึงพอใจเข้ามาแสดงผล
-                include 'satisfaction_form.php';
+                include 'forms/satisfaction_form.php';
                 ?>
             <?php endif; ?>
         </div>

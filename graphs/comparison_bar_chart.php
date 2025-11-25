@@ -1,6 +1,6 @@
 <?php
 // ไฟล์: comparison_bar_chart.php
-// ส่วนแสดงผลของกราฟเปรียบเทียบผลการประเมิน 2 แบบฟอร์ม
+// ส่วนแสดงผลของกราฟเปรียบเทียบผลการประเมิน
 ?>
 <div class="card shadow-sm">
     <div class="card-header card-header-custom text-center">
@@ -8,13 +8,13 @@
     </div>
     <div class="card-body p-4">
         <div class="row align-items-center">
-            <div class="col-lg-6">
+            <div class="col-lg-7">
                 <h5 class="card-title text-center mb-3">คะแนนเฉลี่ยรายข้อของแต่ละแบบฟอร์ม</h5>
                 <canvas id="comparisonChart" style="max-height: 450px;"></canvas>
             </div>
 
             <!-- ส่วนของตารางข้อมูลเปรียบเทียบ -->
-            <div class="col-lg-6">
+            <div class="col-lg-5">
                 <h5 class="card-title text-center mb-3">ตารางสรุปข้อมูลดิบ</h5>
                 <table class="table table-striped table-hover table-bordered">
                     <thead class="table-info">
@@ -44,28 +44,35 @@
 document.addEventListener('DOMContentLoaded', function () {
     // --- กราฟเปรียบเทียบผลการประเมิน (Bar Chart) ---
     const ctx = document.getElementById('comparisonChart').getContext('2d');
-    new Chart(ctx, {
-        type: 'bar',
+    new Chart(ctx, { // ⭐️ FIX: เปลี่ยน type เป็น 'doughnut'
+        type: 'doughnut',
         data: {
             labels: <?php echo $chart_labels; ?>, // ["1. ด้าน...", "2. ด้าน..."]
             datasets: [{
                 label: 'แบบฟอร์มประเมินตนเอง',
                 data: <?php echo $form1_scores_js; ?>,
-                backgroundColor: 'rgba(54, 162, 235, 0.7)',
-                borderColor: 'rgba(54, 162, 235, 1)',
+                backgroundColor: <?php echo $js_background_colors; ?>, // ⭐️ FIX: ใช้ชุดสีสำหรับแต่ละชิ้น
+                borderColor: <?php echo $js_background_colors; ?>.map(color => color.replace('0.7', '1')),
                 borderWidth: 1
             }, {
                 label: 'แบบฟอร์มประเมินโดยผู้บังคับบัญชา',
                 data: <?php echo $form2_scores_js; ?>,
-                backgroundColor: 'rgba(255, 99, 132, 0.7)',
-                borderColor: 'rgba(255, 99, 132, 1)',
+                backgroundColor: <?php echo $js_background_colors; ?>, // ⭐️ FIX: ใช้ชุดสีเดียวกันเพื่อให้เปรียบเทียบง่าย
+                borderColor: <?php echo $js_background_colors; ?>.map(color => color.replace('0.7', '1')),
                 borderWidth: 1
             }]
         },
         options: {
-            responsive: true,
-            scales: { y: { beginAtZero: true, max: 5 } }, // เริ่มแกน Y ที่ 0 และสูงสุดที่ 5
-            plugins: { legend: { position: 'top' } }
+            responsive: true, // ⭐️ FIX: ปรับ options ให้เหมาะกับกราฟโดนัท
+            plugins: { 
+                legend: { position: 'top' },
+                // เพิ่ม datalabels เพื่อแสดงค่าบนกราฟ
+                datalabels: {
+                    formatter: (value, context) => {
+                        return value.toFixed(2); // แสดงค่าเป็นทศนิยม 2 ตำแหน่ง
+                    },
+                    color: '#fff', font: { weight: 'bold' } }
+            }
         }
     });
 });

@@ -1,6 +1,6 @@
 <?php
 // 1. นำเข้าไฟล์เชื่อมต่อฐานข้อมูล
-require_once 'db_connect.php'; 
+require_once 'config/db_connect.php'; 
 
 // ⭐️ เพิ่มแท็ก FORM ครอบทุกส่วน ⭐️
 echo '<form method="POST" action="summary.php" onsubmit="return validateSelection()">'; 

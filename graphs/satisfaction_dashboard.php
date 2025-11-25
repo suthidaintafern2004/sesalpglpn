@@ -1,18 +1,18 @@
 <?php
 // ไฟล์: satisfaction_dashboard.php
-require_once 'db_connect.php';
+require_once '../config/db_connect.php';
 
-// --- การดึงข้อมูลสำหรับ Dashboard ---
-// ดึงข้อมูลคะแนนเฉลี่ยและจำนวนผู้ตอบของแต่ละคำถาม
+// --- 1. การดึงข้อมูลสำหรับ "แบบประเมินตนเอง" (Form 1) ---
+// ใช้สำหรับกราฟวงกลมและเป็นข้อมูลชุดแรกของกราฟเปรียบเทียบ
 $sql = "SELECT
             q.id AS question_id,
             q.question_text,
             AVG(ans.rating) AS average_score,
             COUNT(ans.id) AS response_count
         FROM
-            satisfaction_questions q
+            satisfaction_questions q -- ตารางคำถาม
         LEFT JOIN
-            satisfaction_answers ans ON q.id = ans.question_id
+            satisfaction_answers ans ON q.id = ans.question_id -- ตารางคำตอบแบบประเมินตนเอง
         GROUP BY
             q.id, q.question_text
         ORDER BY
@@ -20,16 +20,47 @@ $sql = "SELECT
 
 $result = $conn->query($sql);
 
-$dashboard_data = [];
+$form1_data = []; // เปลี่ยนชื่อตัวแปรเพื่อความชัดเจน
 if ($result && $result->num_rows > 0) {
-    $item_number = 1; // ⭐️ 1. สร้างตัวแปรนับเลขข้อ
+    $item_number = 1;
     while ($row = $result->fetch_assoc()) {
-        // ⭐️ 2. สร้าง label ใหม่ที่มีเลขข้อนำหน้า (เช่น "1. ความรวดเร็ว...")
         $row['question_text_with_number'] = $item_number . '. ' . $row['question_text'];
-        $dashboard_data[] = $row;
+        $form1_data[] = $row;
         $item_number++;
     }
 }
+
+// --- 2. การดึงข้อมูลสำหรับ "แบบประเมินโดยผู้บังคับบัญชา" (Form 2) ---
+// (สมมติว่ามีตาราง supervisor_satisfaction_answers สำหรับเก็บข้อมูลส่วนนี้)
+$sql_form2 = "SELECT
+                q.id AS question_id,
+                AVG(ans.rating) AS average_score
+            FROM
+                satisfaction_questions q
+            LEFT JOIN
+                supervisor_satisfaction_answers ans ON q.id = ans.question_id -- ตารางคำตอบของผู้บังคับบัญชา
+            GROUP BY
+                q.id
+            ORDER BY
+                q.display_order ASC";
+
+// ดักจับ error กรณีตาราง supervisor_satisfaction_answers ไม่มีอยู่จริง
+try {
+    $result_form2 = $conn->query($sql_form2);
+} catch (mysqli_sql_exception $e) {
+    // หากเกิด exception (เช่น ตารางไม่มี) ให้กำหนด $result_form2 เป็น false
+    // เพื่อให้โค้ดส่วนที่เหลือทำงานต่อไปได้โดยไม่แสดงผลข้อมูลส่วนนี้
+    $result_form2 = false;
+}
+
+$form2_data = [];
+if ($result_form2 && $result_form2->num_rows > 0) {
+    // จัดข้อมูลใส่ array โดยใช้ question_id เป็น key เพื่อให้ง่ายต่อการจับคู่
+    while ($row = $result_form2->fetch_assoc()) {
+        $form2_data[$row['question_id']] = $row;
+    }
+}
+
 
 // --- ส่วนดึงข้อมูลสรุปการนิเทศแต่ละโรงเรียน (เพิ่มใหม่) ---
 $sql_school_supervision = "SELECT
@@ -75,41 +106,50 @@ if ($result_position && $result_position->num_rows > 0) {
     $position_supervision_data = $result_position->fetch_all(MYSQLI_ASSOC);
 }
 
-// --- ส่วนดึงข้อมูลสรุปการนิเทศตามกลุ่มสาระ (เพิ่มใหม่) ---
-$sql_lg_supervision = "SELECT
-                            t.learning_group,
-                            COUNT(ss.id) AS supervision_count
-                        FROM
-                            supervision_sessions ss
-                        JOIN
-                            teacher t ON ss.teacher_t_pid = t.t_pid
-                        WHERE
-                            t.learning_group IS NOT NULL AND t.learning_group != ''
-                        GROUP BY
-                            t.learning_group
-                        ORDER BY
-                            supervision_count DESC";
+// --- ส่วนดึงข้อมูลสรุปจำนวนครูที่ได้รับการนิเทศตามกลุ่มสาระ (แก้ไขตาม request) ---
+$sql_lg_supervised_teachers = "SELECT
+                                    t.learning_group,
+                                    COUNT(DISTINCT ss.teacher_t_pid) AS supervised_teacher_count
+                                FROM
+                                    supervision_sessions ss
+                                JOIN
+                                    teacher t ON ss.teacher_t_pid = t.t_pid
+                                WHERE
+                                    t.learning_group IS NOT NULL AND t.learning_group != ''
+                                GROUP BY
+                                    t.learning_group
+                                ORDER BY
+                                    supervised_teacher_count DESC";
 
-$result_lg = $conn->query($sql_lg_supervision);
-$lg_supervision_data = [];
+$result_lg = $conn->query($sql_lg_supervised_teachers);
+$lg_supervised_teacher_data = [];
 if ($result_lg && $result_lg->num_rows > 0) {
-    $lg_supervision_data = $result_lg->fetch_all(MYSQLI_ASSOC);
+    $lg_supervised_teacher_data = $result_lg->fetch_all(MYSQLI_ASSOC);
 }
 
 $conn->close();
 
 
 // เตรียมข้อมูลสำหรับ Chart.js
-// ⭐️ 3. เปลี่ยนไปใช้ label ที่มีเลขข้อ
-$chart_labels = json_encode(array_column($dashboard_data, 'question_text_with_number'));
+// สำหรับกราฟวงกลม (ใช้ข้อมูล Form 1)
+$chart_labels = json_encode(array_column($form1_data, 'question_text_with_number'));
 
 // FIX: จัดการกับค่า NULL ที่อาจเกิดขึ้นจาก AVG() เมื่อไม่มีข้อมูล
 // แปลงค่า NULL ทั้งหมดใน array ให้เป็น 0 เพื่อให้ Chart.js ทำงานได้
 $scores = array_map(function($score) {
     return $score ?? 0; // ถ้า $score เป็น NULL ให้ใช้ 0 แทน
-}, array_column($dashboard_data, 'average_score'));
+}, array_column($form1_data, 'average_score'));
 
 $chart_values = json_encode($scores);
+
+// เตรียมข้อมูลสำหรับกราฟเปรียบเทียบ (ใช้ข้อมูล Form 1 และ Form 2)
+$comparison_chart_labels = json_encode(array_column($form1_data, 'question_text_with_number'));
+$form1_scores_js = json_encode(array_column($form1_data, 'average_score'));
+// สร้าง array คะแนนของ form 2 ให้มีลำดับตรงกับ form 1
+$form2_scores = array_map(function($question) use ($form2_data) {
+    return $form2_data[$question['question_id']]['average_score'] ?? 0;
+}, $form1_data);
+$form2_scores_js = json_encode($form2_scores);
 
 // เตรียมข้อมูลสำหรับกราฟสรุปการนิเทศแต่ละโรงเรียน (เพิ่มใหม่)
 $school_chart_labels = json_encode(array_column($school_supervision_data, 'SchoolName'));
@@ -119,9 +159,9 @@ $school_chart_values = json_encode(array_column($school_supervision_data, 'super
 $position_chart_labels = json_encode(array_column($position_supervision_data, 'teacher_position'));
 $position_chart_values = json_encode(array_column($position_supervision_data, 'supervised_teacher_count'));
 
-// เตรียมข้อมูลสำหรับกราฟสรุปตามกลุ่มสาระ (เพิ่มใหม่)
-$lg_chart_labels = json_encode(array_column($lg_supervision_data, 'learning_group'));
-$lg_chart_values = json_encode(array_column($lg_supervision_data, 'supervision_count'));
+// เตรียมข้อมูลสำหรับกราฟสรุปจำนวนครูที่ได้รับการนิเทศตามกลุ่มสาระ (แก้ไขตาม request)
+$lg_chart_labels = json_encode(array_column($lg_supervised_teacher_data, 'learning_group'));
+$lg_chart_values = json_encode(array_column($lg_supervised_teacher_data, 'supervised_teacher_count'));
 
 // 🎨 Define colors in PHP to be used in both legend and chart
 $background_colors = [
@@ -147,7 +187,7 @@ $js_background_colors = json_encode($background_colors);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - สรุปผลความพึงพอใจ</title>
+    <title>Dashboard</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -180,28 +220,21 @@ $js_background_colors = json_encode($background_colors);
     <div class="container mt-5">
         <?php
         // --- ส่วนแสดงผลของกราฟ ---
-        // แต่ละไฟล์จะรับผิดชอบการแสดงผล Card และการสร้างกราฟของตัวเอง
-        include 'graph/satisfaction_pie_chart.php';
-        include 'graph/school_supervision_chart.php';
-        include 'graph/position_supervision_chart.php';
-        include 'graph/learning_group_chart.php';
+        // เปลี่ยนชื่อตัวแปร $dashboard_data เป็น $form1_data ก่อน include
+        $dashboard_data = $form1_data;
+        $lg_supervision_data = $lg_supervised_teacher_data; // ใช้ตัวแปรกลางสำหรับ include file เดิม
+        include 'satisfaction_pie_chart.php'; // กราฟสรุปผลความพึงพอใจ (วงกลม)
+        // include 'comparison_bar_chart.php'; // กราฟเปรียบเทียบ 2 แบบฟอร์ม (แท่ง)
+        include 'learning_group_chart.php';
+        include 'school_supervision_chart.php';
+        include 'position_supervision_chart.php';
         ?>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // ⭐️ 5. ลงทะเบียนปลั๊กอิน Datalabels กับ Chart.js
+        // ลงทะเบียนปลั๊กอิน Datalabels กับ Chart.js ให้ทำงานกับทุกกราฟ
         Chart.register(ChartDataLabels);
-
-        // --- ส่วนของ JavaScript สำหรับสร้างกราฟ (ย้ายมาจากไฟล์ include) ---
-        <?php
-            // โค้ด JavaScript จากไฟล์ย่อยจะถูก include เข้ามาทำงานที่นี่
-            // เพื่อให้แน่ใจว่า Chart.register() ทำงานก่อนการสร้างกราฟเสมอ
-            include 'graph/satisfaction_pie_chart.js.php';
-            include 'graph/school_supervision_chart.js.php';
-            include 'graph/position_supervision_chart.js.php';
-            include 'graph/learning_group_chart.js.php';
-        ?>
     </script>
 </body>
 </html>
