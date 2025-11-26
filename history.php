@@ -118,8 +118,8 @@ $conn->close();
                     <a href="index.php" class="btn btn-success">
                         <i class="fas fa-plus-circle"></i> บันทึกการนิเทศ
                     </a>
-                    <a href="graph/satisfaction_dashboard.php" class="btn btn-info">
-                        <i class="fas fa-chart-pie"></i> สรุปผลความพึงพอใจ
+                    <a href="graphs/satisfaction_dashboard.php" class="btn btn-info">
+                        <i class="fas fa-chart-pie"></i> Dashboard
                     </a>
                     <a href="logout.php" class="btn btn-danger">
                         <i class="fas fa-sign-out-alt"></i> ออกจากระบบ
@@ -179,6 +179,20 @@ $conn->close();
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // ⭐️ เพิ่ม script สำหรับแสดง popup แจ้งเตือน
+        document.addEventListener('DOMContentLoaded', function() {
+            <?php
+            if (isset($_SESSION['flash_message'])) {
+                // แสดง alert ด้วยข้อความใน session
+                echo "alert('" . addslashes($_SESSION['flash_message']) . "');";
+                // ล้าง session ออกไปหลังจากแสดงผลแล้ว เพื่อไม่ให้แสดงซ้ำเมื่อรีเฟรช
+                unset($_SESSION['flash_message']);
+            }
+            ?>
+        });
+    </script>
 </body>
 
 </html>

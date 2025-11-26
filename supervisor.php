@@ -17,11 +17,13 @@
             <i class="fas fa-file-alt"></i> <span class="fw-bold">แบบบันทึกข้อมูลผู้นิเทศ และ ผู้รับนิเทศ</span>
         </div>
         
-        <form method="POST" action="summary.php"> 
+        <form method="POST" action="summary.php" onsubmit="return validateSelection(event);"> 
         
             <div class="card-body">
                 <h5 class="card-title fw-bold">ข้อมูลผู้นิเทศ</h5>
                 <hr>
+                <input type="hidden" id="supervisor_id" name="supervisor_pid">
+                
                 <div class="row g-3">
                     
                     <div class="col-md-6">
@@ -48,13 +50,12 @@
                 </div>
             </div>
             <script>
-    // ⭐️ โค้ด JavaScript ใน supervisor.php (ย้ายไปที่นี่เพื่อให้พร้อมใช้งาน)
     function populateNameDropdown() {
         const selectElement = document.getElementById('supervisor_name');
         
-        // ตรวจสอบว่า selectElement มีอยู่จริงก่อนเรียก fetch
         if (!selectElement) return;
 
+        // ⭐️ NOTE: สมมติว่าไฟล์ fetch_supervisor.php มีการดึงชื่อทั้งหมดมา
         fetch('fetch_supervisor.php?action=get_names')
             .then(response => response.json())
             .then(names => {
@@ -73,12 +74,17 @@
         const pidField = document.getElementById('p_id');
         const agencyField = document.getElementById('agency'); 
         const positionField = document.getElementById('position');
+        // ⭐️ FIX: ตัวแปรสำหรับ input ที่ซ่อนไว้
+        const supervisorIdHiddenField = document.getElementById('supervisor_id'); 
 
         pidField.value = '';
         agencyField.value = ''; 
         positionField.value = '';
+        // ⭐️ FIX: ล้างค่า input ที่ซ่อนไว้
+        supervisorIdHiddenField.value = ''; 
 
         if (selectedName) {
+            // ⭐️ NOTE: สมมติว่า fetch_supervisor.php สามารถดึงข้อมูลบุคลากรตามชื่อได้
             fetch(`fetch_supervisor.php?full_name=${encodeURIComponent(selectedName)}`) 
                 .then(response => response.json())
                 .then(result => {
@@ -86,15 +92,18 @@
                         pidField.value = result.data.p_id;
                         agencyField.value = result.data.OfficeName; 
                         positionField.value = result.data.position;
+                        // ⭐️ FIX: อัพเดตค่าใน input ที่ซ่อนไว้
+                        supervisorIdHiddenField.value = result.data.p_id;
                     } else {
                         console.error(result.message);
-                        // alert('ไม่สามารถดึงข้อมูลบุคลากรได้: ' + result.message);
                     }
                 })
                 .catch(error => {
                     console.error('AJAX Error:', error);
-                    // alert('เกิดข้อผิดพลาดในการเชื่อมต่อข้อมูล');
                 });
         }
     }
+    
+    // ⭐️ FIX: เรียกใช้เมื่อ DOM โหลดเสร็จ
+    document.addEventListener('DOMContentLoaded', populateNameDropdown); 
 </script>

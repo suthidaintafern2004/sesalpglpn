@@ -1,7 +1,7 @@
 <?php
 // ไฟล์: summary.php
 session_start();
-require_once 'db_connect.php'; // ⭐️ เพิ่มการเชื่อมต่อ DB สำหรับโหมดแก้ไข
+require_once 'config/db_connect.php'; // ⭐️ เพิ่มการเชื่อมต่อ DB สำหรับโหมดแก้ไข
 
 // ----------------------------------------------------------------
 // A) ตรวจสอบการส่งข้อมูลจากหน้า index.php
@@ -13,12 +13,41 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         // บันทึกข้อมูลทั้งหมด (ผู้นิเทศ, ผู้รับนิเทศ, ประเภทฟอร์ม) ลงใน Session
         $_SESSION['inspection_data'] = $_POST;
 
-        $selected_form = $_POST['evaluation_type'];
+        $selected_form = $_POST['evaluation_type'] ?? null;
 
-        // หากเลือก 'policy_form' ให้เปลี่ยนหน้าไปยัง form_2.php
+        // ⭐️ หากเลือก 'policy_form' ให้บันทึกข้อมูลลง DB แล้วไปหน้า history.php
         if ($selected_form === 'policy_form') {
-            header("Location: form_2.php");
-            exit();
+            // ดึงข้อมูล p_id และ t_pid จาก POST
+            $p_id = $_POST['s_p_id'] ?? null; // ⭐️ แก้ไข: เปลี่ยนจาก p_id เป็น s_p_id ให้ตรงกับฟอร์ม
+            $t_pid = $_POST['t_pid'] ?? null; // t_pid ถูกต้องอยู่แล้ว
+
+            if ($p_id && $t_pid) {
+                // ⭐️ ตั้งค่าโซนเวลาเป็นของประเทศไทย
+                date_default_timezone_set('Asia/Bangkok');
+                $supervision_date = date('Y-m-d H:i:s');
+
+                // เตรียม SQL Statement
+                $stmt = $conn->prepare("INSERT INTO quick_win (p_id, t_id, supervision_date) VALUES (?, ?, ?)");
+                // ⭐️ แก้ไข: เปลี่ยนประเภทข้อมูลจาก "sss" เป็น "iis" ให้ตรงกับชนิดข้อมูลในฐานข้อมูล (integer, integer, string)
+                $stmt->bind_param("iis", $p_id, $t_pid, $supervision_date);
+
+                if ($stmt->execute()) {
+                    // บันทึกสำเร็จ: ตั้งค่า session สำหรับแจ้งเตือนและ redirect
+                    $_SESSION['flash_message'] = "บันทึกข้อมูลเสร็จสิ้น";
+                    header("Location: history.php");
+                    exit();
+                } else {
+                    // บันทึกล้มเหลว
+                    $error_message = "เกิดข้อผิดพลาดในการบันทึกข้อมูล: " . $stmt->error;
+                }
+                $stmt->close();
+            } else {
+                // ข้อมูล p_id หรือ t_pid ไม่ครบ
+                $error_message = "ข้อมูลผู้นิเทศหรือผู้รับนิเทศไม่สมบูรณ์ ไม่สามารถบันทึกได้";
+            }
+        } elseif ($selected_form !== 'kpi_form') {
+            // กรณีไม่ได้เลือกฟอร์มใดๆ หรือค่าไม่ถูกต้อง
+            $error_message = 'กรุณาเลือกแบบฟอร์มที่ต้องการดำเนินการ';
         }
         // หากเป็น 'kpi_form' โค้ดจะทำงานต่อไปเพื่อแสดงผล HTML ด้านล่าง
     }
@@ -32,7 +61,7 @@ $error_message = '';
 
 // หากไม่มีข้อมูลใน Session (เช่น เข้าถึงหน้านี้โดยตรง) ให้แสดงข้อผิดพลาด
 if (!$inspection_data) {
-    $error_message = 'ไม่พบข้อมูลบุคลากร กรุณาเริ่มต้นจากแบบฟอร์มหลัก';
+    $error_message = $error_message ?: 'ไม่พบข้อมูลบุคลากร กรุณาเริ่มต้นจากแบบฟอร์มหลัก';
 }
 ?>
 <!DOCTYPE html>

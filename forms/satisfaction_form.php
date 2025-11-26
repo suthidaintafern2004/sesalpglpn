@@ -1,6 +1,6 @@
 <?php
 // ไฟล์: satisfaction_form.php (จะถูก include ใน satisfaction_summary.php)
-require_once 'db_connect.php'; // ⭐️ เชื่อมต่อฐานข้อมูล
+require_once 'config/db_connect.php'; // ⭐️ เชื่อมต่อฐานข้อมูล
 
 // ดึงข้อมูลจาก Session ที่ถูกตั้งค่าไว้ในหน้า summary
 $satisfaction_data = $_SESSION['satisfaction_data'] ?? [];

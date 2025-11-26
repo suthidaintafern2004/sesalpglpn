@@ -1,7 +1,7 @@
 <?php
 // ไฟล์: save_satisfaction.php
 session_start();
-require_once 'db_connect.php';
+require_once 'config/db_connect.php';
 
 function redirect_with_error($message) {
     $_SESSION['message'] = $message;

@@ -1,7 +1,7 @@
 <?php
 // ไฟล์: satisfaction_summary.php
 session_start();
-require_once 'db_connect.php';
+require_once 'config/db_connect.php';
 
 // 1. ตรวจสอบว่ามี session_id ส่งมาหรือไม่
 if (!isset($_GET['session_id']) || empty($_GET['session_id'])) {

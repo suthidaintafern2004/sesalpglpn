@@ -2,7 +2,7 @@
 // fetch_teacher.php (ฉบับแก้ไข: ใช้ CONCAT ค้นหาชื่อเต็ม)
 
 header('Content-Type: application/json');
-require_once 'db_connect.php'; 
+require_once 'config/db_connect.php'; 
 
 // ----------------------------------------------------------------------
 // โหมด 1: ดึงข้อมูลเฉพาะบุคคลเมื่อเลือกชื่อ (full_name)
@@ -14,9 +14,10 @@ if (isset($_GET['full_name'])) {
     
     // ⭐️ FIX SQL: ค้นหาจากชื่อเต็มที่ถูก CONCAT() ในฐานข้อมูล
     // ตรวจสอบให้แน่ใจว่าการ CONCAT นี้ตรงกับที่คุณใช้สร้าง Datalist ใน teacher.php
-    $sql = "SELECT t.t_pid, t.adm_name, t.learning_group, s.SchoolName
+    $sql = "SELECT t.t_pid, t.adm_name, v.core_learning_group, s.SchoolName
             FROM teacher t
             LEFT JOIN school s ON t.school_id = s.school_id
+            LEFT JOIN view_teacher_core_groups v ON t.t_pid = v.t_pid
             WHERE CONCAT(IFNULL(t.PrefixName, ''), ' ', t.Fname, ' ', t.Lname) = '$full_name_search'";
             
     $result = $conn->query($sql);
@@ -28,7 +29,7 @@ if (isset($_GET['full_name'])) {
         echo json_encode(['success' => true, 'data' => [
             't_pid' => $row['t_pid'], // คีย์สำหรับเลขบัตรประชาชน
             'adm_name' => $row['adm_name'], 
-            'learning_group' => $row['learning_group'],
+            'learning_group' => $row['core_learning_group'],
             'school_name' => $row['SchoolName']
         ]]);
         

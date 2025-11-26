@@ -1,6 +1,6 @@
 <?php
 header('Content-Type: application/json'); // กำหนดให้ Content-Type เป็น JSON
-include 'db_connect.php'; // ไฟล์เชื่อมต่อฐานข้อมูล
+include 'config/db_connect.php'; // ไฟล์เชื่อมต่อฐานข้อมูล
 
 // ----------------------------------------------------------------------
 // โหมด 1: ดึงข้อมูลเฉพาะบุคคลเมื่อเลือกชื่อจาก Dropdown (full_name)

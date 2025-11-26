@@ -26,10 +26,11 @@ $stmt_teacher = $conn->prepare(
         CONCAT(t.PrefixName, t.fname, ' ', t.lname) AS teacher_full_name, 
         s.SchoolName,
         t.adm_name AS teacher_position,
-        t.learning_group
+        vtcg.core_learning_group AS learning_group
      FROM supervision_sessions ss
      LEFT JOIN teacher t ON ss.teacher_t_pid = t.t_pid
      LEFT JOIN school s ON t.school_id = s.school_id
+     LEFT JOIN view_teacher_core_groups vtcg ON t.t_pid = vtcg.t_pid
      WHERE ss.teacher_t_pid = ?
      ORDER BY ss.supervision_date DESC
      LIMIT 1"

@@ -1,7 +1,7 @@
 <?php
 // ไฟล์: save_kpi_data.php
 session_start();
-require_once 'db_connect.php';
+require_once 'config/db_connect.php';
 
 // ⭐️ ฟังก์ชันสำหรับ Redirect พร้อมข้อความ
 function redirect_with_message($message, $type = 'danger') {

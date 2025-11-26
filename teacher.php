@@ -3,8 +3,13 @@
     // ตรวจสอบการเชื่อมต่อ
     if (!isset($conn)) {
         // หาก $conn ไม่มีอยู่ ให้ทำการเชื่อมต่อใหม่ (ไม่ควรเกิดขึ้นถ้า index.php ทำงานถูกต้อง)
-        require_once 'db_connect.php';
+        require_once 'config/db_connect.php';
     }
+
+    // ดึงรายชื่อกลุ่มสาระการเรียนรู้สำหรับ Datalist จาก view_teacher_core_groups
+    $sql_groups = "SELECT DISTINCT core_learning_group FROM view_teacher_core_groups WHERE core_learning_group IS NOT NULL AND core_learning_group != '' ORDER BY core_learning_group ASC";
+    $result_groups = $conn->query($sql_groups);
+
 
     // ดึงรายชื่อครูสำหรับ Datalist
     $sql_teachers = "SELECT CONCAT(IFNULL(PrefixName,''), ' ', Fname, ' ', Lname) AS full_name_display FROM teacher ORDER BY Fname ASC";
@@ -47,7 +52,16 @@
 
            <div class="col-md-6">
                <label for="learning_group" class="form-label fw-bold">กลุ่มสาระการเรียนรู้</label>
-               <input type="text" id="learning_group" name="learning_group" class="form-control display-field" placeholder="--" readonly>
+               <input list="learning_groups_list" id="learning_group" name="learning_group" class="form-control display-field" placeholder="--" readonly>
+               <datalist id="learning_groups_list">
+                   <?php
+                    if ($result_groups) {
+                        while ($row_group = $result_groups->fetch_assoc()) {
+                            echo '<option value="' . htmlspecialchars($row_group['core_learning_group']) . '">';
+                        }
+                    }
+                    ?>
+               </datalist>
            </div>
 
            <div class="col-md-6">
