@@ -1,72 +1,75 @@
 <?php
 // ไฟล์: summary.php
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-require_once 'config/db_connect.php';
+session_start();
+require_once 'config/db_connect.php'; // ⭐️ เพิ่มการเชื่อมต่อ DB สำหรับโหมดแก้ไข
 
-// ฟังก์ชันสำหรับดึงชื่อจาก PID (ป้องกันโค้ดซ้ำซ้อน)
-function getPersonName($conn, $pid, $type) {
-    if ($type === 'supervisor') {
-        $stmt = $conn->prepare("SELECT CONCAT(IFNULL(PrefixName, ''), Fname, ' ', Lname) AS full_name FROM supervisor WHERE p_id = ?");
-    } else { // teacher
-        $stmt = $conn->prepare("SELECT CONCAT(IFNULL(PrefixName, ''), Fname, ' ', Lname) AS full_name FROM teacher WHERE t_pid = ?");
-    }
-    
-    if ($stmt) {
-        $stmt->bind_param("s", $pid);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        if ($result->num_rows > 0) {
-            return $result->fetch_assoc()['full_name'];
+// ----------------------------------------------------------------
+// A) ตรวจสอบการส่งข้อมูลจากหน้า index.php
+// ----------------------------------------------------------------
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // เมื่อข้อมูลถูกส่งมาจาก index.php
+    if (isset($_POST['evaluation_type'])) {
+        // บันทึกข้อมูลทั้งหมด (ผู้นิเทศ, ผู้รับนิเทศ, ประเภทฟอร์ม) ลงใน Session
+        $_SESSION['inspection_data'] = $_POST;
+
+        $selected_form = $_POST['evaluation_type'] ?? null;
+
+        // ตรวจสอบการเลือกฟอร์มและ redirect ไปยังหน้าที่ถูกต้อง
+        if ($selected_form === 'quickwin_form') {
+            // ถ้าเลือก Quick Win Form ให้ไปที่หน้า quickwin_form.php
+            header("Location: forms/quickwin_form.php");
+            exit();
+        } elseif ($selected_form === 'kpi_form') {
+            // ถ้าเลือก KPI Form ให้แสดงผลในหน้านี้ต่อไป (ไม่ต้องทำอะไร)
+        } elseif ($selected_form !== 'kpi_form') {
+            // กรณีไม่ได้เลือกฟอร์มใดๆ หรือค่าไม่ถูกต้อง
+            $error_message = 'กรุณาเลือกแบบฟอร์มที่ต้องการดำเนินการ';
         }
-        $stmt->close();
+        // หากเป็น 'kpi_form' โค้ดจะทำงานต่อไปเพื่อแสดงผล HTML ด้านล่าง
     }
-    return 'ไม่พบข้อมูล';
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // รับค่า supervisor_pid, teacher_pid, และ evaluation_type จากฟอร์ม
-    $supervisor_pid = $_POST['supervisor_pid'] ?? null;
-    $teacher_pid = $_POST['teacher_pid'] ?? null;
-    $evaluation_type = $_POST['evaluation_type'] ?? null;
+// ----------------------------------------------------------------
+// B) ตรวจสอบข้อมูลใน Session ก่อนแสดงผล
+// ----------------------------------------------------------------
+$inspection_data = $_SESSION['inspection_data'] ?? null;
+$error_message = '';
 
-    if (!$supervisor_pid || !$teacher_pid || !$evaluation_type) {
-        // ถ้าข้อมูลไม่ครบ ให้กลับไปหน้าแรกพร้อมข้อความ error
-        $_SESSION['flash_message'] = "เกิดข้อผิดพลาด: กรุณาเลือกข้อมูลให้ครบถ้วน";
-        header('Location: index.php');
-        exit();
-    }
-
-    // ดึงชื่อจากฐานข้อมูล
-    $supervisor_name = getPersonName($conn, $supervisor_pid, 'supervisor');
-    $teacher_name = getPersonName($conn, $teacher_pid, 'teacher');
-
-    // เก็บข้อมูลลงใน Session
-    $_SESSION['inspection_data'] = [
-        'supervisor_pid' => $supervisor_pid,
-        'supervisor_name' => $supervisor_name,
-        'teacher_pid' => $teacher_pid,
-        'teacher_name' => $teacher_name,
-        'evaluation_type' => $evaluation_type
-    ];
-
-    $conn->close();
-
-    // ⭐️ แก้ไข: ส่งต่อไปยังฟอร์มที่เลือกด้วย header('Location: ...') ที่ถูกต้อง
-    if ($evaluation_type === 'kpi_form') {
-        header('Location: forms/kpi_form.php');
-        exit();
-    } elseif ($evaluation_type === 'quickwin_form') {
-        header('Location: forms/quickwin_form.php');
-        exit();
-    } else {
-        $_SESSION['flash_message'] = "เกิดข้อผิดพลาด: ประเภทแบบฟอร์มไม่ถูกต้อง";
-        header('Location: index.php');
-        exit();
-    }
-} else {
-    // ถ้าไม่ได้เข้ามาหน้านี้ด้วย POST ให้กลับไปหน้าแรก
-    header('Location: index.php');
-    exit();
+// หากไม่มีข้อมูลใน Session (เช่น เข้าถึงหน้านี้โดยตรง) ให้แสดงข้อผิดพลาด
+if (!$inspection_data) {
+    $error_message = $error_message ?: 'ไม่พบข้อมูลบุคลากร กรุณาเริ่มต้นจากแบบฟอร์มหลัก';
 }
+?>
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>แบบฟอร์มประเมิน KPI</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+    <div class="main-card card my-5">
+        <div class="form-header card-header text-center bg-success text-white">
+            <i class="fas fa-check-circle"></i> <span class="fw-bold">แบบบันทึกข้อมูลการนิเทศ</span>
+        </div>
+        <div class="card-body">
+            <?php if ($error_message !== ''): ?>
+                <div class="alert alert-danger text-center">
+                    <p><?php echo $error_message; ?></p>
+                    <a href="index.php" class="btn btn-danger">ไปยังแบบฟอร์มเริ่มต้น</a>
+                </div>
+            <?php else: ?>
+                <?php
+                // รวมฟอร์ม KPI ทั้งหมดเข้ามาแสดงผลในหน้านี้
+                include 'forms/kpi_form.php';
+                ?>
+            <?php endif; ?>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

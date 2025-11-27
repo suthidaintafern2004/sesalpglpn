@@ -25,9 +25,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     try {
+        // ⭐️ ตั้งค่าโซนเวลาและสร้างวันที่ปัจจุบัน
+        date_default_timezone_set('Asia/Bangkok');
+        $supervision_date = date('Y-m-d H:i:s');
+
         // 4. เตรียมคำสั่ง SQL เพื่อบันทึกข้อมูล (ใช้ Prepared Statement)
-        // สังเกต: ชื่อคอลัมน์ในตาราง quick_win คือ p_id, t_id, options, option_other ตามที่ผู้ใช้ระบุ
-        $sql = "INSERT INTO quick_win (p_id, t_id, options, option_other) VALUES (?, ?, ?, ?)";
+        // ⭐️ เพิ่มคอลัมน์ supervision_date เข้าไปในคำสั่ง SQL
+        // ไม่ต้องใส่ id เพราะเป็น auto-increment
+        $sql = "INSERT INTO quick_win (p_id, t_id, options, option_other, supervision_date) VALUES (?, ?, ?, ?, ?)";
         
         $stmt = $conn->prepare($sql);
 
@@ -36,10 +41,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             throw new Exception("Prepare statement failed: " . $conn->error);
         }
 
-        // 5. Bind Parameters (ssis: string, string, integer, string)
-        // s = string, i = integer
-        // สมมติว่า p_id และ t_id เป็น string, options เป็น integer, และ option_other เป็น string
-        $stmt->bind_param("ssis", $p_id, $t_id, $options, $option_other);
+        // 5. Bind Parameters
+        // ⭐️ เพิ่มประเภทข้อมูล 's' สำหรับ supervision_date
+        // ssis: string, string, integer, string
+        $stmt->bind_param("ssiss", $p_id, $t_id, $options, $option_other, $supervision_date);
 
         // 6. Execute คำสั่ง
         if ($stmt->execute()) {

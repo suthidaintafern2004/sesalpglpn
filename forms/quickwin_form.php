@@ -20,8 +20,8 @@ $data = $_SESSION['inspection_data'];
 // กำหนดตัวแปรสำหรับแสดงผล
 $supervisor_name = $data['supervisor_name'] ?? 'ไม่ระบุผู้นิเทศ';
 $teacher_name = $data['teacher_name'] ?? 'ไม่ระบุผู้รับนิเทศ';
-$supervisor_pid = $data['supervisor_pid'] ?? ''; 
-$teacher_pid = $data['teacher_pid'] ?? '';       
+$supervisor_pid = $data['s_p_id'] ?? ''; // ⭐️ แก้ไข: ดึง s_p_id จาก session
+$teacher_pid = $data['t_pid'] ?? '';       // ⭐️ แก้ไข: ดึง t_pid จาก session
 
 // ------------------------------------------------
 // B) ดึงข้อมูลหัวข้อการนิเทศจากตาราง quickwin_options
