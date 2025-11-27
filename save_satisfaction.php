@@ -1,4 +1,4 @@
-<?php
+ทำให้แบบฟอม css เหมือนกับ kpi หน่อยสิ<?php
 // ไฟล์: save_satisfaction.php
 session_start();
 require_once 'config/db_connect.php';

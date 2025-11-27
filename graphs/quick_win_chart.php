@@ -1,36 +1,44 @@
 <?php
 // ไฟล์: quick_win_chart.php
-// ใช้สำหรับแสดงผลกราฟ Quick Win
+// ส่วนแสดงผลของกราฟสรุปการนิเทศ (Quick Win) แต่ละโรงเรียน
 
 // ตรวจสอบว่ามีข้อมูลส่งมาหรือไม่
 if (!isset($dashboard_data) || empty($dashboard_data)) {
     echo "<div class='alert alert-warning text-center'>ไม่มีข้อมูลสำหรับแสดงผลกราฟ Quick Win</div>";
     return; // หยุดการทำงานถ้าไม่มีข้อมูล
 }
-
-// เตรียมข้อมูลสำหรับ Chart.js
-$labels = json_encode(array_column($dashboard_data, 'question_text_with_number'));
-
-$scores = array_map(function($score) {
-    return $score ?? 0;
-}, array_column($dashboard_data, 'average_score'));
-$values = json_encode($scores);
-
-$chart_title = "สรุปผลความสำเร็จตามเป้าหมาย (Quick Win)";
-
 ?>
 
-<div class="card chart-card">
-    <div class="card-header card-header-custom">
-        <h5 class="card-title mb-0"><i class="fas fa-trophy"></i> <?php echo $chart_title; ?></h5>
+<div class="card shadow-sm mt-4">
+    <div class="card-header card-header-custom text-center" style="background-color: #6f42c1;">
+        <h2 class="h4 mb-0"><i class="fas fa-trophy"></i> สรุปจำนวนการนิเทศ (Quick Win) ในแต่ละโรงเรียน</h2>
     </div>
-    <div class="card-body">
-        <div class="row">
-            <div class="col-md-8">
-                <canvas id="quickWinChart"></canvas>
+    <div class="card-body p-4">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h5 class="card-title text-center mb-3">กราฟแสดงจำนวนครั้งที่ได้รับการนิเทศ</h5>
+                <canvas id="quickWinSchoolChart"></canvas>
             </div>
-            <div class="col-md-4">
-                <div id="quickWinLegend" class="custom-legend mt-4"></div>
+
+            <!-- ส่วนของตารางข้อมูล -->
+            <div class="col-lg-6">
+                <h5 class="card-title text-center mb-3">ตารางสรุปข้อมูลดิบ</h5>
+                <table class="table table-striped table-hover table-bordered">
+                    <thead class="table-primary" style="background-color: #6f42c1; color: white;">
+                        <tr class="text-center">
+                            <th scope="col">โรงเรียน</th>
+                            <th scope="col">จำนวนครั้งที่นิเทศ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($dashboard_data as $data): ?>
+                            <tr>
+                                <td><?php echo htmlspecialchars($data['SchoolName']); ?></td>
+                                <td class="text-center"><?php echo $data['supervision_count']; ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
@@ -38,17 +46,18 @@ $chart_title = "สรุปผลความสำเร็จตามเป�
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const ctx = document.getElementById('quickWinChart').getContext('2d');
-    const labels = <?php echo $labels; ?>;
-    const dataValues = <?php echo $values; ?>;
+    // --- กราฟสรุปการนิเทศ Quick Win แต่ละโรงเรียน (Bar Chart) ---
+    const quickWinCtx = document.getElementById('quickWinSchoolChart').getContext('2d');
+    const labels = <?php echo $chart_labels; ?>;
+    const dataValues = <?php echo $chart_values; ?>;
     const bgColors = <?php echo $js_background_colors; ?>;
 
-    const quickWinChart = new Chart(ctx, {
-        type: 'bar', // เปลี่ยนเป็นกราฟแท่ง
+    new Chart(quickWinCtx, {
+        type: 'bar',
         data: {
             labels: labels,
             datasets: [{
-                label: 'คะแนนเฉลี่ย',
+                label: 'จำนวนครั้งที่นิเทศ',
                 data: dataValues,
                 backgroundColor: bgColors,
                 borderColor: bgColors.map(color => color.replace('0.7', '1')),
@@ -56,38 +65,13 @@ document.addEventListener('DOMContentLoaded', function() {
             }]
         },
         options: {
-            indexAxis: 'y', // ทำให้เป็นกราฟแท่งแนวนอน
+            scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } },
             responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                x: {
-                    beginAtZero: true,
-                    max: 5 // กำหนดค่าสูงสุดของแกน X
-                }
-            },
             plugins: {
-                legend: {
-                    display: false // ปิดการแสดงผล legend ของ Chart.js
-                },
-                datalabels: {
-                    anchor: 'end',
-                    align: 'end',
-                    formatter: (value, context) => {
-                        return parseFloat(value).toFixed(2); // แสดงทศนิยม 2 ตำแหน่ง
-                    },
-                    color: '#333',
-                    font: {
-                        weight: 'bold'
-                    }
-                }
+                legend: { display: false }, 
+                datalabels: { anchor: 'end', align: 'top', color: '#363636', font: { weight: 'bold' } } 
             }
         }
-    });
-
-    // สร้าง Legend เอง
-    const legendContainer = document.getElementById('quickWinLegend');
-    labels.forEach((label, index) => {
-        legendContainer.innerHTML += `<div class="legend-item"><div class="legend-color-box" style="background-color: ${bgColors[index % bgColors.length]}"></div><span>${label}</span></div>`;
     });
 });
 </script>

@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once 'db_connect.php';
+require_once 'config/db_connect.php';
 
 if (!isset($_POST['session_id'])) {
     echo "Session ID is missing.";
@@ -184,7 +184,7 @@ $pdf->SetFont('thsarabun', '', 22); // ขนาดตัวอักษรว�
 
 // 2.1 วันที่ (Day)
 // ปรับค่า X (แนวนอน) เพื่อขยับซ้าย-ขวา
-$pdf->SetXY(127,151); 
+$pdf->SetXY(128,151); 
 $pdf->Cell(10, 0, $issue_date_parts['day'], 0, 0, 'C');
 
 // 2.2 เดือน (Month)
@@ -194,7 +194,7 @@ $pdf->Cell(30, 0, $issue_date_parts['month'], 0, 0, 'C');
 
 // 2.3 พ.ศ. (Year)
 // ปรับค่า X ให้ตรงกับช่องว่างของปี
-$pdf->SetXY(140, 151); 
+$pdf->SetXY(139, 151); 
 $pdf->Cell(0,0, $issue_date_parts['year'], 0, 0, 'C');
 
 // Output the PDF to the browser

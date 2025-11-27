@@ -1,4 +1,3 @@
-<link rel="stylesheet" href="css/styles.css">
 <?php
 // ⭐️ เริ่ม Session และตรวจสอบการล็อกอิน
 if (session_status() === PHP_SESSION_NONE) {
@@ -9,7 +8,7 @@ if (!isset($_SESSION['is_logged_in']) || $_SESSION['is_logged_in'] !== true) {
     exit;
 }
 // 1. เชื่อมต่อฐานข้อมูล
-require_once 'config/db_connect.php';
+require_once '../config/db_connect.php';
 
 // 2. ดึงข้อมูลตัวชี้วัดและคำถามทั้งหมดในครั้งเดียวด้วย JOIN
 $sql = "SELECT 

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 26, 2025 at 04:55 AM
+-- Generation Time: Nov 27, 2025 at 07:34 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.0.30
 
@@ -41,7 +41,8 @@ INSERT INTO `certificate_log` (`id`, `session_id`, `generated_at`) VALUES
 (1, 31, '2025-11-25 06:37:26'),
 (2, 32, '2025-11-25 06:51:52'),
 (3, 40, '2025-11-25 14:11:44'),
-(4, 42, '2025-11-25 14:37:36');
+(4, 42, '2025-11-25 14:37:36'),
+(5, 43, '2025-11-26 07:53:41');
 
 -- --------------------------------------------------------
 
@@ -65,8 +66,8 @@ INSERT INTO `images` (`id`, `session_id`, `file_name`, `uploaded_on`) VALUES
 (6, 38, 'img_6923e2a1165613.46771415.jpg', '2025-11-24 11:44:17'),
 (7, 41, 'img_6925bc9a7edd42.97946460.jpg', '2025-11-25 21:26:34'),
 (8, 41, 'img_6925bc9a7f27d8.32807572.jfif', '2025-11-25 21:26:34'),
-(9, 43, 'img_69265fb6990e71.97391875.jpg', '2025-11-26 09:02:30'),
-(10, 43, 'img_69265fb699a247.81496906.jpg', '2025-11-26 09:02:30');
+(9, 43, 'img_6926b1c932ccf5.27316957.png', '2025-11-26 14:52:41'),
+(10, 43, 'img_6926b1c94ba522.31734026.jpg', '2025-11-26 14:52:41');
 
 -- --------------------------------------------------------
 
@@ -375,14 +376,14 @@ INSERT INTO `kpi_answers` (`id`, `session_id`, `question_id`, `rating_score`, `c
 (733, 42, 22, 3, ''),
 (734, 42, 23, 3, ''),
 (735, 42, 24, 3, ''),
-(736, 43, 1, 3, ''),
-(737, 43, 2, 3, ''),
-(738, 43, 3, 3, ''),
-(739, 43, 4, 3, ''),
-(740, 43, 5, 3, ''),
-(741, 43, 6, 3, ''),
-(742, 43, 7, 0, ''),
-(743, 43, 8, 1, ''),
+(736, 43, 1, 3, 'aaa'),
+(737, 43, 2, 3, 'aaa'),
+(738, 43, 3, 3, 'asd'),
+(739, 43, 4, 3, 'asdasd'),
+(740, 43, 5, 3, 'asdasd'),
+(741, 43, 6, 3, 'asdasd'),
+(742, 43, 7, 3, ''),
+(743, 43, 8, 3, 'asdasd'),
 (744, 43, 9, 3, ''),
 (745, 43, 10, 3, ''),
 (746, 43, 11, 3, ''),
@@ -541,7 +542,7 @@ INSERT INTO `kpi_indicator_suggestions` (`id`, `session_id`, `indicator_id`, `su
 (244, 42, 7, 'ทดสอบข้อมูล'),
 (245, 42, 8, 'ทดสอบข้อมูล'),
 (246, 43, 1, 'ทดสอบข้อมูล'),
-(247, 43, 2, 'ทดสอบข้อมูล'),
+(247, 43, 2, 'ทดสอบข้อมูลasdasd'),
 (248, 43, 3, 'ทดสอบข้อมูล'),
 (249, 43, 4, 'ทดสอบข้อมูล'),
 (250, 43, 5, 'ทดสอบข้อมูล'),
@@ -552,16 +553,82 @@ INSERT INTO `kpi_indicator_suggestions` (`id`, `session_id`, `indicator_id`, `su
 -- --------------------------------------------------------
 
 --
--- Table structure for table `kpi_supervision`
+-- Table structure for table `kpi_questions`
 --
 
-CREATE TABLE `kpi_supervision` (
+CREATE TABLE `kpi_questions` (
   `id` int(11) NOT NULL,
-  `p_id` int(11) NOT NULL COMMENT 'รหัสผู้นิเทศ (Supervisor ID)',
-  `t_id` int(11) NOT NULL COMMENT 'รหัสผู้รับการนิเทศ (Teacher ID)',
-  `supervision_date` datetime NOT NULL COMMENT 'วันที่และเวลาที่บันทึกข้อมูล',
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp() COMMENT 'เวลาที่สร้างรายการ'
+  `indicator_id` int(11) NOT NULL COMMENT 'FK อ้างอิงถึงตาราง kpi_indicators',
+  `question_text` text NOT NULL COMMENT 'ข้อความคำถาม',
+  `display_order` int(11) NOT NULL DEFAULT 0 COMMENT 'ลำดับการแสดงผลของคำถามในตัวชี้วัดนั้นๆ'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+
+--
+-- Dumping data for table `kpi_questions`
+--
+
+INSERT INTO `kpi_questions` (`id`, `indicator_id`, `question_text`, `display_order`) VALUES
+(1, 1, '1.1 เนื้อหา (Content) พร้อมโน้ตทัศน์ที่จัดให้ผู้เรียนเรียนรู้ หรือฝึกฝน มีความถูกต้อง และ ตรงตามหลักสูตร', 1),
+(2, 1, '1.2 ออกแบบและจัดโครงสร้างบทเรียนเป็นระบบและใช้เวลาเหมาะสม', 2),
+(3, 1, '1.3 ใช้สื่อประกอบบทเรียนได้เหมาะสมและช่วยในการเรียนรู้บรรลุวัตถุประสงค์ของบทเรียน', 3),
+(4, 2, '2.1 มีการทบทวนความรู้ ทักษะ หรือประสปการณ์ เดิม เช่น การใช้คำถาม แบบฝึก หรือกิจกรรม ฯลฯ', 1),
+(5, 2, '2.2 มีการเข้าถึงผู้เรียนที่ยังไม่พร้อมที่จะเรียนรู้ใหม่ ', 2),
+(6, 2, '2.3 มีการช่วยเหลือผู้เรียนที่ยังมีความรู้ ทักษะ หรือ ประสปการณ์เดิมไม่เพียงพอที่จะเชื่อมโยงกับ การเรียนรู้ใหม่ เช่น การอธิบาย ยกตัวอย่าง การใช้คำถาม เกม หรือกิจกรรม ฯลฯ ', 3),
+(7, 3, '3.1 ออกแบบงานหรือกิจกรรมให้ผู้เรียนสร้างความรู้หรือประสปการณ์ใหม่อย่างเหมาะสมกับวัยสภาพ และบริบทของผู้เรียนและชั้นเรียน', 1),
+(8, 3, '3.2 ผู้เรียนได้ลงมือปฏิบัติกิจกรรมที่ต้องใช้ความรู้หรือทักษะหลากหลาย', 2),
+(9, 3, '3.3 ใช้เทคนิคให้ผู้เรียนสรุปความรู้ หรือ ประสปการณ์ใหม่ด้วยตนเอง และสื่อสารความเข้าใจที่เชื่อมโยงองค์ความรู้ เช่น แผนที่ความคิด ตารางวิเคราะห์ การทดลองปฏิบัติ การนำเสนอ ฯลฯ', 3),
+(10, 4, '4.1 กิจกรรมการเรียนรู้เชื่อมโยงสอดคล้องกับ ชีวิตประจำวัน บริบทชุมชน หรือสภาพจริงที่มีความหมายกับผู้เรียน', 1),
+(11, 4, '4.2 วิธีหรือกิจกรรมการเรียนรู้ มีความท้าทาย และมีระดับความยากง่ายเหมาะสมกับวัย สภาพ และพัฒนาการของผู้เรียน', 2),
+(12, 4, '4.3 ผู้เรียนมีโอกาศสะท้อนการเรียนรู้ แลกเปลี่ยน เรียนรู้ นำเสนอความสำเร็จ หรือ อธิบายข้อผิดพลาด/ความล้มเหลวที่เกิดขึ้นจากการเรียนรู้/การปฏิบัติกิจกรรม', 3),
+(13, 5, '5.1 ผู้เรียนได้ฝึกทักษะต่าง ๆ ครบถ้วนตามวัตถุประสงค์การเรียนรู้ / การจัดกิจกรรม ', 1),
+(14, 5, '5.2 ผู้เรียนได้บูรณาการทักษะต่างๆ ลงสู่การปฏิบัติกิจกรรมการเรียนรู้ ', 2),
+(15, 5, '5.3 ผู้เรียนได้ประยุกต์ใช้ทักษะที่ได้รับการพัฒนาในสถานการณ์หรือการแก้ปัญหาใหม่ๆ ', 3),
+(16, 6, '6.1 มีการสังเกตุหรือค้นหาข้อผิดพลาดในการปฏิบัติหรือมโนทัศน์ที่คลาดเคลื่อนของผู้เรียนในระหว่างการเรียนรู้ ', 1),
+(17, 6, '6.2 มีการประเมินผลระหว่างการเรียนรู้โดยใช้วิธีการที่เหมาะสม เช่น การใช้คำถาม แบบทดสอบ การปฏิบัติ ฯลฯ', 2),
+(18, 6, '6.3 มีการนำผลการสังเกตุ หรือผลการค้นหา หรือ ผลการประเมินระหว่างเรียนรู้สะท้อนกลับให้ผู้เรียน', 3),
+(19, 7, '7.1  ผู้เรียนได้รับแบบอย่างที่ดีในการใช้ภาษาพฤติกรรมแสดงออก และเจตคติจากครูผู้สอน', 1),
+(20, 7, '7.2  กระตุ้นให้ผู้เรียนมั่นใจ มีอิสระในการคิด หรือ ทดลอง และรับความรู้ความสามารถของตนเอง', 2),
+(21, 7, '7.3  ใช้สื่อการเรียนหรือตัวอย่างประกอบที่หลากหลาย และกระตุ้นให้ผู้เรียนคิดวิเคราะห์เปรียบเทียบจากสื่อการเรียนหรือตัวอย่าง', 3),
+(22, 8, '8.1 ผู้เรียนได้รับโอกาสในการกำหนดเป้าหมายการเรียนรู้หรือการลงมือปฏิบัติ /การปฏิบัติกิจกรรมด้วยตนเองหรือกระบวนการกลุ่ม', 1),
+(23, 8, '8.2 ผู้เรียนได้ประเมินตนเองหรือถูกเพื่อนประเมินในระหว่างเรียน หรือ เมื่อจบบทเรียน / ระหว่างปฏิบัติหรือเมื่อภายหลังจบกิจกรรม', 2),
+(24, 8, '8.3 ผู้เรียนได้รับการกระตุ้นหรือการมอบหมายงานให้ศึกษา ค้นคว้า ฝึกฝน หรือเรียนรู้ต่อเนื่องเพิ่มเติมภายหลังจบบทเรียน /ภายหลังจบกิจกรรม', 3);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `quickwin_options`
+--
+
+CREATE TABLE `quickwin_options` (
+  `OptionID` int(11) NOT NULL,
+  `OptionText` varchar(500) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `quickwin_options`
+--
+
+INSERT INTO `quickwin_options` (`OptionID`, `OptionText`) VALUES
+(1, '1.ปลูกฝังความรักในสถาบันหลักของชาติ และน้อมนำพระบรมราโชบายด้านการศึกษาสู่การปฏิบัติ'),
+(2, '2.ส่งเสริมและพัฒนาการจัดการเรียนรู้ ภูมิศาสตร์ ประวัติศาสตร์ หน้าที่พลเมือง ศีลธรรม และประชาธิปไตย'),
+(3, '3.ปรับกระบวนการจัดการเรียนรู้ให้หลากหลาย ด้วยเทคโนโลยีที่ทันสมัย'),
+(4, '4.ส่งเสริมการอ่านให้เป็นวิถีปฏิบัติ เพื่อให้ผู้เรียนค้นหาและพัฒนาต่อยอดองค์ความรู้ อย่างต่อเนื่อง'),
+(5, '5.ส่งเสริม สนับสนุนกิจกรรมพัฒนาผู้เรียน'),
+(6, '6.พัฒนาการจัดการศึกษาสำหรับเด็กที่มีความต้องการจำเป็นพิเศษ'),
+(7, '7.ส่งเสริมศักยภาพผู้เรียนรายบุคคลสู่ความเป็นเลิศ'),
+(8, '8.เสริมสร้างความปลอดภัยของผู้เรียน ครูและบุคลากรทางการศึกษา และสถานศึกษา'),
+(9, '9.เพิ่มโอกาสและสร้างความเสมอภาคทางการศึกษา'),
+(10, '10.พัฒนาครูและบุคลากรทางการศึกษาให้มีความรู้ ความสามารถ และทักษะที่ทันสมัย'),
+(11, '11.จัดการเรียนรู้และวัดประเมินผลที่มุ่งเน้นพัฒนาการตามศักยภาพผู้เรียนรายบุคคล'),
+(12, '12.พัฒนาระบบบริหารจัดการให้มีประสิทธิภาพ ถูกต้อง รวดเร็ว ประโยชน์ ประหยัด โปร่งใสและตรวจสอบได้'),
+(13, '13.ระบบนิเทศภายในสถานศึกษา'),
+(14, '14.ลดภาระครู'),
+(15, '15.เพิ่มสวัสดิการครูและบุคลากรทางการศึกษา'),
+(16, '16.ส่งเสริมการเรียนดี มีคุณธรรม'),
+(17, '17.ส่งเสริม สนับสนุน พัฒนาหลักสูตรสถานศึกษา'),
+(18, '18.ส่งเสริมและพัฒนากระบวนการเรียนรู้'),
+(19, '19.ส่งเสริมและพัฒนาการประกันคุณภาพการศึกษา'),
+(20, '20.ส่งเสริมและพัฒนาการวัดและประเมินผลการศึกษา');
 
 -- --------------------------------------------------------
 
@@ -581,12 +648,14 @@ CREATE TABLE `quick_win` (
 --
 
 INSERT INTO `quick_win` (`id`, `t_id`, `p_id`, `supervision_date`) VALUES
-(1, '2147483647', '2147483647', '2025-11-26 03:37:16'),
 (2, '1520600036859', '3520100379974', '2025-11-26 03:40:48'),
 (3, '1529900621526', '1529900191467', '2025-11-26 03:41:30'),
 (4, '1509901158021', '1520590004267', '2025-11-26 09:42:50'),
 (5, '1520600036859', '1529900270499', '2025-11-26 10:42:37'),
-(6, '1509901218768', '3520900142120', '2025-11-26 10:46:31');
+(6, '1509901218768', '3520900142120', '2025-11-26 10:46:31'),
+(0, '3510600301451', '1560100030525', '2025-11-26 13:55:54'),
+(0, '1520600036859', '3520100379974', '2025-11-26 14:07:27'),
+(0, '3500600241742', '3509900553730', '2025-11-26 15:02:19');
 
 -- --------------------------------------------------------
 
@@ -665,7 +734,22 @@ INSERT INTO `satisfaction_answers` (`id`, `session_id`, `question_id`, `rating`)
 (57, 42, 12, 5),
 (58, 42, 13, 5),
 (59, 42, 14, 5),
-(60, 42, 15, 5);
+(60, 42, 15, 5),
+(61, 43, 1, 5),
+(62, 43, 2, 5),
+(63, 43, 3, 5),
+(64, 43, 4, 5),
+(65, 43, 5, 5),
+(66, 43, 6, 5),
+(67, 43, 7, 5),
+(68, 43, 8, 5),
+(69, 43, 9, 5),
+(70, 43, 10, 5),
+(71, 43, 11, 5),
+(72, 43, 12, 5),
+(73, 43, 13, 5),
+(74, 43, 14, 5),
+(75, 43, 15, 5);
 
 -- --------------------------------------------------------
 
@@ -825,7 +909,7 @@ INSERT INTO `supervision_sessions` (`id`, `supervisor_p_id`, `teacher_t_pid`, `s
 (40, '3509900553730', '3900200192635', 'พ001', 'พละ', 6, '2025-11-25', '-', '2025-11-25 14:10:56', '', 1, '2025-11-25 21:11:43'),
 (41, '5520700016810', '1529900190924', 'ท0001', 'ภาษาไทย', 9, '2025-11-25', '-', '2025-11-25 14:26:34', NULL, 0, NULL),
 (42, '5520700016810', '1505300005693', 'ค0001', 'ภาษาไทย', 1, '2025-11-25', '-', '2025-11-25 14:36:42', '', 1, '2025-11-25 21:37:34'),
-(43, '3520100379974', '1509900989451', 'ท0001', 'ภาษาไทย', 2, '2025-11-26', '-', '2025-11-26 02:02:30', NULL, 0, NULL);
+(43, '3509900553730', '3659900688618', 'ท0001', 'ภาษาไทย', 1, '2025-11-26', '-', '2025-11-26 07:52:41', 'vvvv', 1, '2025-11-26 14:53:09');
 
 -- --------------------------------------------------------
 
@@ -2517,6 +2601,42 @@ INSERT INTO `teacher` (`t_pid`, `school_id`, `prefix_id`, `PrefixName`, `fname`,
 -- --------------------------------------------------------
 
 --
+-- Stand-in structure for view `view_quick_win_dashboard`
+-- (See below for the actual view)
+--
+CREATE TABLE `view_quick_win_dashboard` (
+`teacher_id` varchar(255)
+,`full_name` varchar(301)
+,`school_id` int(11)
+,`school_name` varchar(255)
+,`school_group_id` int(11)
+,`position_rank` varchar(100)
+,`original_learning_group` varchar(255)
+,`core_learning_group` varchar(48)
+);
+
+-- --------------------------------------------------------
+
+--
+-- Stand-in structure for view `view_quick_win_dashboard_all_events`
+-- (See below for the actual view)
+--
+CREATE TABLE `view_quick_win_dashboard_all_events` (
+`quick_win_id` int(11)
+,`supervision_date` datetime
+,`teacher_id` varchar(255)
+,`full_name` varchar(301)
+,`school_id` int(11)
+,`school_name` varchar(255)
+,`school_group_id` int(11)
+,`position_rank` varchar(100)
+,`original_learning_group` varchar(255)
+,`core_learning_group` varchar(48)
+);
+
+-- --------------------------------------------------------
+
+--
 -- Stand-in structure for view `view_teacher_core_groups`
 -- (See below for the actual view)
 --
@@ -2535,6 +2655,23 @@ CREATE TABLE `view_teacher_core_groups` (
 -- --------------------------------------------------------
 
 --
+-- Stand-in structure for view `view_teacher_dashboard_info`
+-- (See below for the actual view)
+--
+CREATE TABLE `view_teacher_dashboard_info` (
+`teacher_id` varchar(255)
+,`full_name` varchar(301)
+,`school_id` int(11)
+,`school_name` varchar(255)
+,`school_group_id` int(11)
+,`position_rank` varchar(100)
+,`original_learning_group` varchar(255)
+,`core_learning_group` varchar(28)
+);
+
+-- --------------------------------------------------------
+
+--
 -- Structure for view `supervisordetails`
 --
 DROP TABLE IF EXISTS `supervisordetails`;
@@ -2544,11 +2681,38 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW 
 -- --------------------------------------------------------
 
 --
+-- Structure for view `view_quick_win_dashboard`
+--
+DROP TABLE IF EXISTS `view_quick_win_dashboard`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `view_quick_win_dashboard`  AS SELECT DISTINCT `t`.`t_pid` AS `teacher_id`, concat(ifnull(`t`.`PrefixName`,''),`t`.`fname`,' ',`t`.`lname`) AS `full_name`, `t`.`school_id` AS `school_id`, ifnull(`s`.`SchoolName`,'ไม่ระบุโรงเรียน') AS `school_name`, `s`.`SchoolGroup` AS `school_group_id`, ifnull(`t`.`adm_name`,'ไม่ระบุ') AS `position_rank`, `t`.`learning_group` AS `original_learning_group`, CASE WHEN `t`.`learning_group` like '%ภาษาไทย%' THEN 'กลุ่มสาระการเรียนรู้ภาษาไทย' WHEN `t`.`learning_group` like '%คณิตศาสตร์%' THEN 'กลุ่มสาระการเรียนรู้คณิตศาสตร์' WHEN `t`.`learning_group` regexp 'วิทยาศาสตร์|เคมี|ฟิสิกส์|ชีววิทยา|คอมพิวเตอร์|เทคโนโลยี|โลก ดาราศาสตร์' THEN 'กลุ่มสาระการเรียนรู้วิทยาศาสตร์และเทคโนโลยี' WHEN `t`.`learning_group` like '%สังคม%' OR `t`.`learning_group` like '%ประวัติศาสตร์%' OR `t`.`learning_group` like '%ภูมิศาสตร์%' THEN 'กลุ่มสาระการเรียนรู้สังคมศึกษา ศาสนา และวัฒนธรรม' WHEN `t`.`learning_group` regexp 'สุขศึกษา|พลศึกษา|พละ' THEN 'กลุ่มสาระการเรียนรู้สุขศึกษาและพลศึกษา' WHEN `t`.`learning_group` regexp 'ศิลป|ดนตรี|นาฎศิลป์|ทัศนศิลป์' THEN 'กลุ่มสาระการเรียนรู้ศิลปะ' WHEN `t`.`learning_group` regexp 'การงาน|เกษตร|คหกรรม|อุตสาหกรรม|พณิชยกรรม|บริหารธุรกิจ' THEN 'กลุ่มสาระการเรียนรู้การงานอาชีพ' WHEN `t`.`learning_group` regexp 'อังกฤษ|จีน|ญี่ปุ่น|ฝรั่งเศส|เกาหลี|ต่างประเทศ' THEN 'กลุ่มสาระการเรียนรู้ภาษาต่างประเทศ' WHEN `t`.`learning_group` like '%แนะแนว%' THEN 'กิจกรรมพัฒนาผู้เรียน' ELSE 'อื่นๆ' END AS `core_learning_group` FROM ((`teacher` `t` join `quick_win` `qw` on(`t`.`t_pid` = `qw`.`t_id`)) left join `school` `s` on(`t`.`school_id` = `s`.`school_id`)) ;
+
+-- --------------------------------------------------------
+
+--
+-- Structure for view `view_quick_win_dashboard_all_events`
+--
+DROP TABLE IF EXISTS `view_quick_win_dashboard_all_events`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `view_quick_win_dashboard_all_events`  AS SELECT `qw`.`id` AS `quick_win_id`, `qw`.`supervision_date` AS `supervision_date`, `t`.`t_pid` AS `teacher_id`, concat(ifnull(`t`.`PrefixName`,''),`t`.`fname`,' ',`t`.`lname`) AS `full_name`, `t`.`school_id` AS `school_id`, ifnull(`s`.`SchoolName`,'ไม่ระบุโรงเรียน') AS `school_name`, `s`.`SchoolGroup` AS `school_group_id`, ifnull(`t`.`adm_name`,'ไม่ระบุ') AS `position_rank`, `t`.`learning_group` AS `original_learning_group`, CASE WHEN `t`.`learning_group` like '%ภาษาไทย%' THEN 'กลุ่มสาระการเรียนรู้ภาษาไทย' WHEN `t`.`learning_group` like '%คณิตศาสตร์%' THEN 'กลุ่มสาระการเรียนรู้คณิตศาสตร์' WHEN `t`.`learning_group` regexp 'วิทยาศาสตร์|เคมี|ฟิสิกส์|ชีววิทยา|คอมพิวเตอร์|เทคโนโลยี|โลก ดาราศาสตร์' THEN 'กลุ่มสาระการเรียนรู้วิทยาศาสตร์และเทคโนโลยี' WHEN `t`.`learning_group` like '%สังคม%' OR `t`.`learning_group` like '%ประวัติศาสตร์%' OR `t`.`learning_group` like '%ภูมิศาสตร์%' THEN 'กลุ่มสาระการเรียนรู้สังคมศึกษา ศาสนา และวัฒนธรรม' WHEN `t`.`learning_group` regexp 'สุขศึกษา|พลศึกษา|พละ' THEN 'กลุ่มสาระการเรียนรู้สุขศึกษาและพลศึกษา' WHEN `t`.`learning_group` regexp 'ศิลป|ดนตรี|นาฎศิลป์|ทัศนศิลป์' THEN 'กลุ่มสาระการเรียนรู้ศิลปะ' WHEN `t`.`learning_group` regexp 'การงาน|เกษตร|คหกรรม|อุตสาหกรรม|พณิชยกรรม|บริหารธุรกิจ' THEN 'กลุ่มสาระการเรียนรู้การงานอาชีพ' WHEN `t`.`learning_group` regexp 'อังกฤษ|จีน|ญี่ปุ่น|ฝรั่งเศส|เกาหลี|ต่างประเทศ' THEN 'กลุ่มสาระการเรียนรู้ภาษาต่างประเทศ' WHEN `t`.`learning_group` like '%แนะแนว%' THEN 'กิจกรรมพัฒนาผู้เรียน' ELSE 'อื่นๆ' END AS `core_learning_group` FROM ((`quick_win` `qw` join `teacher` `t` on(`qw`.`t_id` = `t`.`t_pid`)) left join `school` `s` on(`t`.`school_id` = `s`.`school_id`)) ;
+
+-- --------------------------------------------------------
+
+--
 -- Structure for view `view_teacher_core_groups`
 --
 DROP TABLE IF EXISTS `view_teacher_core_groups`;
 
-CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `view_teacher_core_groups`  AS SELECT `t`.`t_pid` AS `t_pid`, `t`.`prefix_id` AS `prefix_id`, `t`.`PrefixName` AS `PrefixName`, `t`.`fname` AS `fname`, `t`.`lname` AS `lname`, `t`.`learning_group_id` AS `learning_group_id`, `t`.`learning_group` AS `original_group_name`, CASE WHEN `t`.`learning_group_id` in (1311,1352) THEN 'กลุ่มสาระการเรียนรู้ภาษาไทย' WHEN `t`.`learning_group_id` = 1312 THEN 'กลุ่มสาระการเรียนรู้คณิตศาสตร์' WHEN `t`.`learning_group_id` in (1313,1314,1315,1316,1394,9905) THEN 'กลุ่มสาระการเรียนรู้วิทยาศาสตร์และเทคโนโลยี' WHEN `t`.`learning_group_id` = 1319 THEN 'กลุ่มสาระการเรียนรู้สังคมศึกษา ศาสนา และวัฒนธรรม' WHEN `t`.`learning_group_id` in (1322,1323) THEN 'กลุ่มสาระการเรียนรู้สุขศึกษาและพลศึกษา' WHEN `t`.`learning_group_id` in (1324,1326,1327,1329,1330) THEN 'กลุ่มสาระการเรียนรู้ศิลปะ' WHEN `t`.`learning_group_id` in (1351,1303,1305,1308,1301) THEN 'กลุ่มสาระการเรียนรู้การงานอาชีพ' WHEN `t`.`learning_group_id` in (1339,1340,1344,1345,1346) THEN 'กลุ่มสาระการเรียนรู้ภาษาต่างประเทศ' ELSE 'อื่นๆ/ไม่ระบุ' END AS `core_learning_group`, CASE WHEN `t`.`learning_group_id` in (1313,1314,1315,1316,1394) THEN 'วิทยาศาสตร์' WHEN `t`.`learning_group_id` = 9905 THEN 'เทคโนโลยี' ELSE NULL END AS `sci_tech_type` FROM `teacher` AS `t` ;
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `view_teacher_core_groups`  AS SELECT `t`.`t_pid` AS `t_pid`, `t`.`prefix_id` AS `prefix_id`, `t`.`PrefixName` AS `PrefixName`, `t`.`fname` AS `fname`, `t`.`lname` AS `lname`, `t`.`learning_group_id` AS `learning_group_id`, `t`.`learning_group` AS `original_group_name`, CASE WHEN `t`.`learning_group` like '%ภาษาไทย%' THEN 'กลุ่มสาระการเรียนรู้ภาษาไทย' WHEN `t`.`learning_group` like '%คณิตศาสตร์%' THEN 'กลุ่มสาระการเรียนรู้คณิตศาสตร์' WHEN `t`.`learning_group` regexp 'วิทยาศาสตร์|เคมี|ฟิสิกส์|ชีววิทยา|คอมพิวเตอร์|เทคโนโลยี|โลก ดาราศาสตร์' THEN 'กลุ่มสาระการเรียนรู้วิทยาศาสตร์และเทคโนโลยี' WHEN `t`.`learning_group` like '%สังคม%' OR `t`.`learning_group` like '%ประวัติศาสตร์%' OR `t`.`learning_group` like '%ภูมิศาสตร์%' THEN 'กลุ่มสาระการเรียนรู้สังคมศึกษา ศาสนา และวัฒนธรรม' WHEN `t`.`learning_group` regexp 'สุขศึกษา|พลศึกษา|พละ' THEN 'กลุ่มสาระการเรียนรู้สุขศึกษาและพลศึกษา' WHEN `t`.`learning_group` regexp 'ศิลป|ดนตรี|นาฎศิลป์|ทัศนศิลป์' THEN 'กลุ่มสาระการเรียนรู้ศิลปะ' WHEN `t`.`learning_group` regexp 'การงาน|เกษตร|คหกรรม|อุตสาหกรรม|พณิชยกรรม|บริหารธุรกิจ' THEN 'กลุ่มสาระการเรียนรู้การงานอาชีพ' WHEN `t`.`learning_group` regexp 'อังกฤษ|จีน|ญี่ปุ่น|ฝรั่งเศส|เกาหลี|ต่างประเทศ' THEN 'กลุ่มสาระการเรียนรู้ภาษาต่างประเทศ' WHEN `t`.`learning_group` like '%แนะแนว%' THEN 'กิจกรรมพัฒนาผู้เรียน' ELSE 'อื่นๆ' END AS `core_learning_group`, CASE WHEN `t`.`learning_group_id` in (1313,1314,1315,1316,1394) THEN 'วิทยาศาสตร์' WHEN `t`.`learning_group_id` = 9905 THEN 'เทคโนโลยี' ELSE NULL END AS `sci_tech_type` FROM `teacher` AS `t` ;
+
+-- --------------------------------------------------------
+
+--
+-- Structure for view `view_teacher_dashboard_info`
+--
+DROP TABLE IF EXISTS `view_teacher_dashboard_info`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `view_teacher_dashboard_info`  AS SELECT `t`.`t_pid` AS `teacher_id`, concat(ifnull(`t`.`PrefixName`,''),`t`.`fname`,' ',`t`.`lname`) AS `full_name`, `t`.`school_id` AS `school_id`, ifnull(`s`.`SchoolName`,'ไม่ระบุโรงเรียน') AS `school_name`, `s`.`SchoolGroup` AS `school_group_id`, ifnull(`t`.`adm_name`,'ไม่ระบุ') AS `position_rank`, `t`.`learning_group` AS `original_learning_group`, CASE WHEN `t`.`learning_group` like '%ภาษาไทย%' THEN 'ภาษาไทย' WHEN `t`.`learning_group` like '%คณิตศาสตร์%' THEN 'คณิตศาสตร์' WHEN `t`.`learning_group` regexp 'วิทยาศาสตร์|เคมี|ฟิสิกส์|ชีววิทยา|คอมพิวเตอร์|เทคโนโลยี|โลก ดาราศาสตร์' THEN 'วิทยาศาสตร์และเทคโนโลยี' WHEN `t`.`learning_group` like '%สังคม%' OR `t`.`learning_group` like '%ประวัติศาสตร์%' OR `t`.`learning_group` like '%ภูมิศาสตร์%' THEN 'สังคมศึกษา ศาสนา และวัฒนธรรม' WHEN `t`.`learning_group` regexp 'สุขศึกษา|พลศึกษา|พละ' THEN 'สุขศึกษาและพลศึกษา' WHEN `t`.`learning_group` regexp 'ศิลป|ดนตรี|นาฎศิลป์|ทัศนศิลป์' THEN 'ศิลปะ' WHEN `t`.`learning_group` regexp 'การงาน|เกษตร|คหกรรม|อุตสาหกรรม|พณิชยกรรม|บริหารธุรกิจ' THEN 'การงานอาชีพ' WHEN `t`.`learning_group` regexp 'อังกฤษ|จีน|ญี่ปุ่น|ฝรั่งเศส|เกาหลี|ต่างประเทศ' THEN 'ภาษาต่างประเทศ' WHEN `t`.`learning_group` like '%แนะแนว%' THEN 'กิจกรรมพัฒนาผู้เรียน' ELSE 'อื่นๆ' END AS `core_learning_group` FROM (`teacher` `t` left join `school` `s` on(`t`.`school_id` = `s`.`school_id`)) ;
 
 --
 -- Indexes for dumped tables
@@ -2583,16 +2747,10 @@ ALTER TABLE `kpi_indicator_suggestions`
   ADD KEY `session_id` (`session_id`);
 
 --
--- Indexes for table `kpi_supervision`
+-- Indexes for table `quickwin_options`
 --
-ALTER TABLE `kpi_supervision`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `quick_win`
---
-ALTER TABLE `quick_win`
-  ADD PRIMARY KEY (`id`);
+ALTER TABLE `quickwin_options`
+  ADD PRIMARY KEY (`OptionID`);
 
 --
 -- Indexes for table `satisfaction_answers`
@@ -2615,7 +2773,7 @@ ALTER TABLE `supervision_sessions`
 -- AUTO_INCREMENT for table `certificate_log`
 --
 ALTER TABLE `certificate_log`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `images`
@@ -2636,22 +2794,16 @@ ALTER TABLE `kpi_indicator_suggestions`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=254;
 
 --
--- AUTO_INCREMENT for table `kpi_supervision`
+-- AUTO_INCREMENT for table `quickwin_options`
 --
-ALTER TABLE `kpi_supervision`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `quick_win`
---
-ALTER TABLE `quick_win`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+ALTER TABLE `quickwin_options`
+  MODIFY `OptionID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
 -- AUTO_INCREMENT for table `satisfaction_answers`
 --
 ALTER TABLE `satisfaction_answers`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=61;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=76;
 
 --
 -- AUTO_INCREMENT for table `supervision_sessions`

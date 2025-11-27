@@ -30,7 +30,13 @@ if (isset($_SESSION['error_message'])) {
             align-items: center;
             justify-content: center;
             height: 100vh;
-            background-color: #f0f2f5;
+            /* --- ส่วนสำหรับใส่ภาพพื้นหลัง --- */
+            /* แก้ไข: เปลี่ยนจาก background-color เป็น background-image */
+            background-image: url('images/login_bg.png'); /* ⭐️ แก้ไข path รูปภาพตรงนี้ได้เลยครับ */
+            background-size: cover; /* ทำให้ภาพเต็มหน้าจอ */
+            background-position: center; /* จัดภาพให้อยู่กึ่งกลาง */
+            background-repeat: no-repeat; /* ไม่ให้ภาพซ้ำ */
+            background-attachment: fixed; /* ทำให้ภาพพื้นหลังคงที่เมื่อเลื่อนหน้าจอ */
         }
         .login-card {
             width: 100%;

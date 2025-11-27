@@ -83,6 +83,7 @@ $conn->close();
     <title>ประวัติการนิเทศของ <?php echo htmlspecialchars($teacher_info['teacher_full_name']); ?></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="css/styles.css">
 </head>
 
 <body>
@@ -113,7 +114,8 @@ $conn->close();
                             <th scope="col" style="width: 5%;">ครั้งที่</th>
                             <th scope="col" style="width: 20%;">ผู้นิเทศ</th>
                             <th scope="col" style="width: 12%;">รายงาน</th>
-                            <?php if (!$is_supervisor): // ⭐️ ถ้าไม่ใช่ผู้นิเทศ ให้แสดงคอลัมน์ประเมิน ?>
+                            <?php if (!$is_supervisor): // ⭐️ ถ้าไม่ใช่ผู้นิเทศ ให้แสดงคอลัมน์ประเมิน 
+                            ?>
                                 <th scope="col" style="width: 12%;">ประเมิน</th>
                             <?php endif; ?>
                             <th scope="col" style="width: 12%;">เกียรติบัตร</th>
@@ -122,7 +124,8 @@ $conn->close();
                     <tbody>
                         <?php if (empty($results)) : ?>
                             <tr>
-                                <?php // ⭐️ ปรับ colspan ตามการแสดงผล ?>
+                                <?php // ⭐️ ปรับ colspan ตามการแสดงผล 
+                                ?>
                                 <td colspan="<?php echo $is_supervisor ? '5' : '6'; ?>" class="text-center text-danger fw-bold">ไม่พบประวัติการนิเทศสำหรับครูท่านนี้</td>
                             </tr>
                         <?php else : ?>
@@ -132,30 +135,38 @@ $conn->close();
                                     <td><?php echo htmlspecialchars($row['inspection_time']); ?></td>
                                     <td><?php echo htmlspecialchars($row['supervisor_full_name']); ?></td>
                                     <td>
-                                        <?php // ปุ่มดูรายงาน ?>
+                                        <?php // ปุ่มดูรายงาน 
+                                        ?>
                                         <form method="POST" action="supervision_report.php" style="display:inline;">
                                             <input type="hidden" name="session_id" value="<?php echo $row['session_id']; ?>">
                                             <button type="submit" class="btn btn-sm btn-primary" title="ดูรายงานผลการนิเทศ"><i class="fas fa-file-alt"></i> ดูรายงาน</button>
                                         </form>
                                     </td>
-                                    <?php if (!$is_supervisor): // ⭐️ ถ้าไม่ใช่ผู้นิเทศ ให้แสดงคอลัมน์ประเมิน ?>
+                                    <?php if (!$is_supervisor): // ⭐️ ถ้าไม่ใช่ผู้นิเทศ ให้แสดงคอลัมน์ประเมิน 
+                                    ?>
                                         <td>
-                                            <?php // ปุ่มประเมินจะแสดงเมื่อไม่ใช่ผู้นิเทศเท่านั้น ?>
-                                            <?php if ($row['satisfaction_submitted'] == 0): // ถ้ายังไม่ประเมิน (0) ให้แสดงปุ่มประเมิน ?>
+                                            <?php // ปุ่มประเมินจะแสดงเมื่อไม่ใช่ผู้นิเทศเท่านั้น 
+                                            ?>
+                                            <?php if ($row['satisfaction_submitted'] == 0): // ถ้ายังไม่ประเมิน (0) ให้แสดงปุ่มประเมิน 
+                                            ?>
                                                 <a href="satisfaction_summary.php?session_id=<?php echo $row['session_id']; ?>" class="btn btn-sm btn-success" title="ประเมินความพึงพอใจ"><i class="fas fa-smile-beam"></i> ประเมิน</a>
-                                            <?php else: // ถ้าประเมินแล้ว (1) ให้แสดงปุ่มที่กดไม่ได้ ?>
+                                            <?php else: // ถ้าประเมินแล้ว (1) ให้แสดงปุ่มที่กดไม่ได้ 
+                                            ?>
                                                 <button class="btn btn-sm btn-secondary" disabled title="ประเมินความพึงพอใจแล้ว"><i class="fas fa-check-circle"></i> ประเมินแล้ว</button>
                                             <?php endif; ?>
                                         </td>
                                     <?php endif; ?>
                                     <td>
-                                        <?php // --- ปุ่มพิมพ์เกียรติบัตร (กลับไปใช้ไอคอน) --- ?>
-                                        <?php if ($row['satisfaction_submitted'] == 1): // ถ้าประเมินแล้ว (1) ให้กดพิมพ์ได้ ?>
+                                        <?php // --- ปุ่มพิมพ์เกียรติบัตร (กลับไปใช้ไอคอน) --- 
+                                        ?>
+                                        <?php if ($row['satisfaction_submitted'] == 1): // ถ้าประเมินแล้ว (1) ให้กดพิมพ์ได้ 
+                                        ?>
                                             <form method="POST" action="certificate.php" style="display:inline;" target="_blank">
                                                 <input type="hidden" name="session_id" value="<?php echo $row['session_id']; ?>">
                                                 <button type="submit" class="btn btn-sm btn-success" title="พิมพ์เกียรติบัตร"><i class="fas fa-award"></i></button>
                                             </form>
-                                        <?php else: // ถ้ายังไม่ประเมิน (0) ให้แสดงปุ่มที่กดไม่ได้ ?>
+                                        <?php else: // ถ้ายังไม่ประเมิน (0) ให้แสดงปุ่มที่กดไม่ได้ 
+                                        ?>
                                             <button class="btn btn-sm btn-danger" disabled title="ต้องให้ผู้รับการนิเทศประเมินความพึงพอใจก่อน"><i class="fas fa-award"></i></button>
                                         <?php endif; ?>
                                     </td>

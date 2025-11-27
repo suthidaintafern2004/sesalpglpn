@@ -11,29 +11,29 @@ $form_type = isset($_GET['form_type']) ? (int)$_GET['form_type'] : 1;
 $page_title = $form_titles[$form_type] ?? "สรุปผลความพึงพอใจ";
 
 // --- การดึงข้อมูลสำหรับกราฟความพึงพอใจ (เลือกตาม form_type) ---
-$questions_table = 'satisfaction_questions'; // ตารางคำถามหลัก
+$satisfaction_data = [];
+$sql = "";
+
 if ($form_type == 3) {
     // --- 3. การดึงข้อมูลสำหรับ "Quick Win" (Form 3) ---
-    // แก้ไข: ดึงข้อมูลจากตาราง quick_win โดยตรง
+    // ดึงข้อมูลจาก view_quick_win_dashboard และนับจำนวนครั้งตามโรงเรียน
     $sql = "SELECT
-                item_name AS question_text,
-                AVG(rating) AS average_score,
-                COUNT(id) AS response_count
+                school_name AS SchoolName,
+                COUNT(*) AS supervision_count
             FROM
-                quick_win
+                view_quick_win_dashboard_all_events
             GROUP BY
-                item_name
+                school_name
             ORDER BY
-                item_name ASC";
-} else { // Default to form_type = 1
-    // --- 1. การดึงข้อมูลสำหรับ "แบบประเมินตนเอง" (Form 1) ---
+                supervision_count DESC";
+} else { // Default to form_type = 1 (หรืออื่นๆ)
     $sql = "SELECT
                 q.id AS question_id, 
                 q.question_text,
                 AVG(ans.rating) AS average_score,
                 COUNT(ans.id) AS response_count
             FROM
-                {$questions_table} q
+                satisfaction_questions q
             LEFT JOIN
                 satisfaction_answers ans ON q.id = ans.question_id 
             GROUP BY
@@ -42,83 +42,93 @@ if ($form_type == 3) {
                 q.display_order ASC";
 }
 
-$satisfaction_data = [];
 if ($sql) {
     $result = $conn->query($sql);
     if ($result && $result->num_rows > 0) {
         $item_number = 1;
         while ($row = $result->fetch_assoc()) {
-            $row['question_text_with_number'] = $item_number . '. ' . $row['question_text'];
+            if ($form_type == 1) {
+                $row['question_text_with_number'] = $item_number . '. ' . $row['question_text'];
+                $item_number++;
+            }
             $satisfaction_data[] = $row;
-            $item_number++;
         }
     }
 }
 
-
-// --- ส่วนดึงข้อมูลสรุปการนิเทศแต่ละโรงเรียน (เพิ่มใหม่) ---
-$sql_school_supervision = "SELECT
-                                s.SchoolName,
-                                COUNT(ss.id) AS supervision_count
-                            FROM
-                                supervision_sessions ss
-                            JOIN
-                                teacher t ON ss.teacher_t_pid = t.t_pid
-                            JOIN
-                                school s ON t.school_id = s.school_id
-                            GROUP BY
-                                s.SchoolName
-                            HAVING
-                                COUNT(ss.id) > 0
-                            ORDER BY
-                                supervision_count DESC";
-
-$result_school = $conn->query($sql_school_supervision);
+// --- ส่วนดึงข้อมูลสำหรับกราฟสรุปต่างๆ ---
 $school_supervision_data = [];
-if ($result_school && $result_school->num_rows > 0) {
-    $school_supervision_data = $result_school->fetch_all(MYSQLI_ASSOC);
-}
-
-// --- ส่วนดึงข้อมูลสรุปการนิเทศตามตำแหน่งครู (เพิ่มใหม่) ---
-$sql_position_supervision = "SELECT
-                                t.adm_name AS teacher_position,
-                                COUNT(DISTINCT ss.teacher_t_pid) AS supervised_teacher_count
-                            FROM
-                                supervision_sessions ss
-                            JOIN
-                                teacher t ON ss.teacher_t_pid = t.t_pid
-                            WHERE
-                                t.adm_name IS NOT NULL AND t.adm_name != ''
-                            GROUP BY
-                                t.adm_name
-                            ORDER BY
-                                supervised_teacher_count DESC";
-
-$result_position = $conn->query($sql_position_supervision);
 $position_supervision_data = [];
-if ($result_position && $result_position->num_rows > 0) {
-    $position_supervision_data = $result_position->fetch_all(MYSQLI_ASSOC);
-}
+$lg_supervised_teacher_data = [];
 
-// --- ส่วนดึงข้อมูลสรุปจำนวนครูที่ได้รับการนิเทศตามกลุ่มสาระ (แก้ไขตาม request) ---
-$sql_lg_supervised_teachers = "SELECT
-                                    vtcg.core_learning_group AS learning_group,
+if ($form_type == 3) {
+    // สำหรับ Quick Win: ดึงข้อมูลสรุปจาก view_quick_win_dashboard_all_events
+    // 1. สรุปรายโรงเรียน (ใช้ข้อมูลเดียวกับกราฟหลัก)
+    $school_supervision_data = $satisfaction_data;
+
+    // 2. สรุปตามตำแหน่ง
+    $sql_position = "SELECT position_rank AS teacher_position, COUNT(*) AS supervised_teacher_count FROM view_quick_win_dashboard_all_events WHERE position_rank IS NOT NULL AND position_rank COLLATE utf8_unicode_ci != '' GROUP BY position_rank ORDER BY supervised_teacher_count DESC";
+    $result_pos = $conn->query($sql_position);
+    if ($result_pos) $position_supervision_data = $result_pos->fetch_all(MYSQLI_ASSOC);
+
+    // 3. สรุปตามกลุ่มสาระ
+    $sql_lg = "SELECT core_learning_group AS learning_group, COUNT(*) AS supervised_teacher_count FROM view_quick_win_dashboard_all_events WHERE core_learning_group IS NOT NULL AND core_learning_group COLLATE utf8mb4_unicode_ci != '' GROUP BY core_learning_group ORDER BY supervised_teacher_count DESC";
+    $result_lg = $conn->query($sql_lg);
+    if ($result_lg) $lg_supervised_teacher_data = $result_lg->fetch_all(MYSQLI_ASSOC);
+
+} else {
+    // สำหรับ Form 1: ดึงข้อมูลสรุปจากตาราง supervision_sessions
+    // 1. สรุปรายโรงเรียน
+    $sql_school_supervision = "SELECT
+                                    s.SchoolName,
+                                    COUNT(ss.id) AS supervision_count
+                                FROM
+                                    supervision_sessions ss
+                                JOIN
+                                    teacher t ON ss.teacher_t_pid = t.t_pid
+                                JOIN
+                                    school s ON t.school_id = s.school_id
+                                GROUP BY
+                                    s.SchoolName
+                                HAVING
+                                    COUNT(ss.id) > 0
+                                ORDER BY
+                                    supervision_count DESC";
+    $result_school = $conn->query($sql_school_supervision);
+    if ($result_school) $school_supervision_data = $result_school->fetch_all(MYSQLI_ASSOC);
+
+    // 2. สรุปตามตำแหน่ง
+    $sql_position_supervision = "SELECT
+                                    t.adm_name AS teacher_position,
                                     COUNT(DISTINCT ss.teacher_t_pid) AS supervised_teacher_count
                                 FROM
                                     supervision_sessions ss
                                 JOIN
-                                    view_teacher_core_groups vtcg ON ss.teacher_t_pid = vtcg.t_pid
+                                    teacher t ON ss.teacher_t_pid = t.t_pid
                                 WHERE
-                                    vtcg.core_learning_group IS NOT NULL AND vtcg.core_learning_group COLLATE utf8mb4_unicode_ci != ''
+                                    t.adm_name IS NOT NULL AND t.adm_name COLLATE utf8_unicode_ci != ''
                                 GROUP BY
-                                    vtcg.core_learning_group
+                                    t.adm_name
                                 ORDER BY
                                     supervised_teacher_count DESC";
+    $result_position = $conn->query($sql_position_supervision);
+    if ($result_position) $position_supervision_data = $result_position->fetch_all(MYSQLI_ASSOC);
 
-$result_lg = $conn->query($sql_lg_supervised_teachers);
-$lg_supervised_teacher_data = [];
-if ($result_lg && $result_lg->num_rows > 0) {
-    $lg_supervised_teacher_data = $result_lg->fetch_all(MYSQLI_ASSOC);
+    // 3. สรุปตามกลุ่มสาระ
+    $sql_lg_supervised_teachers = "SELECT
+                                        vtcg.core_learning_group AS learning_group,
+                                        COUNT(DISTINCT ss.teacher_t_pid) AS supervised_teacher_count
+                                    FROM
+                                        supervision_sessions ss
+                                    JOIN
+                                        view_teacher_core_groups vtcg ON ss.teacher_t_pid = vtcg.t_pid
+                                WHERE vtcg.core_learning_group IS NOT NULL AND vtcg.core_learning_group COLLATE utf8mb4_unicode_ci != ''
+                                    GROUP BY
+                                        vtcg.core_learning_group
+                                    ORDER BY
+                                        supervised_teacher_count DESC";
+    $result_lg = $conn->query($sql_lg_supervised_teachers);
+    if ($result_lg) $lg_supervised_teacher_data = $result_lg->fetch_all(MYSQLI_ASSOC);
 }
 
 $conn->close();
@@ -126,15 +136,14 @@ $conn->close();
 
 // เตรียมข้อมูลสำหรับ Chart.js
 // สำหรับกราฟวงกลม (ใช้ข้อมูล Form 1)
-$chart_labels = json_encode(array_column($satisfaction_data, 'question_text_with_number'));
-
-// FIX: จัดการกับค่า NULL ที่อาจเกิดขึ้นจาก AVG() เมื่อไม่มีข้อมูล
-// แปลงค่า NULL ทั้งหมดใน array ให้เป็น 0 เพื่อให้ Chart.js ทำงานได้
-$scores = array_map(function($score) {
-    return $score ?? 0; // ถ้า $score เป็น NULL ให้ใช้ 0 แทน
-}, array_column($satisfaction_data, 'average_score'));
-
-$chart_values = json_encode($scores);
+if ($form_type == 1) {
+    $chart_labels = json_encode(array_column($satisfaction_data, 'question_text_with_number'));
+    $scores = array_map(fn($score) => $score ?? 0, array_column($satisfaction_data, 'average_score'));
+    $chart_values = json_encode($scores);
+} else { // สำหรับ form_type = 3
+    $chart_labels = json_encode(array_column($satisfaction_data, 'SchoolName'));
+    $chart_values = json_encode(array_column($satisfaction_data, 'supervision_count'));
+}
 
 // เตรียมข้อมูลสำหรับกราฟสรุปการนิเทศแต่ละโรงเรียน
 $school_chart_labels = json_encode(array_column($school_supervision_data, 'SchoolName'));
@@ -180,7 +189,13 @@ $js_background_colors = json_encode($background_colors);
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
     <style>
         body {
-            background-color: #f8f9fa;
+            background-image: url('../images/bg001.jpg');
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center center;
+            background-attachment: fixed;
+            /* Fallback color in case the image fails to load */
+            background-color: #f8f9fa; 
         }
         .card-header-custom {
             background-color: #17a2b8; /* Bootstrap info color */
@@ -241,22 +256,28 @@ $js_background_colors = json_encode($background_colors);
             </div>
         <?php endif; ?>
 
-        <!-- แถวที่ 2: กราฟกลุ่มสาระ และ ตำแหน่ง -->
+        <!-- ================================================================== -->
+        <!-- ส่วนแสดงกราฟสรุปต่างๆ (แสดงทุก form_type แต่ข้อมูลข้างในต่างกัน) -->
+        <!-- ================================================================== -->
+
+        <!-- แถวที่ 2: กราฟกลุ่มสาระ -->
         <div class="row">
             <div class="col-lg-12 chart-card">
                 <?php $lg_supervision_data = $lg_supervised_teacher_data; include 'learning_group_chart.php'; ?>
             </div>
+        </div>
+
+        <!-- แถวที่ 3: กราฟตำแหน่ง -->
+        <div class="row">
             <div class="col-lg-12 chart-card">
                 <?php include 'position_supervision_chart.php'; ?>
             </div>
         </div>
 
-        <!-- แถวที่ 3: กราฟรายโรงเรียน -->
-        <div class="row">
-            <div class="col-lg-12 chart-card">
-                <?php include 'school_supervision_chart.php'; ?>
-            </div>
-        </div>
+        <!-- แถวที่ 4: กราฟรายโรงเรียน (สำหรับ form_type=1) -->
+        <?php if ($form_type == 1): ?>
+            <?php include 'school_supervision_chart.php'; ?>
+        <?php endif; ?>
 
     </div>
 
