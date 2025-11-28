@@ -7,7 +7,7 @@
     }
 
     // ดึงรายชื่อกลุ่มสาระการเรียนรู้สำหรับ Datalist จาก view_teacher_core_groups
-    $sql_groups = "SELECT DISTINCT core_learning_group FROM view_teacher_core_groups WHERE core_learning_group IS NOT NULL AND core_learning_group != '' ORDER BY core_learning_group ASC";
+    $sql_groups = "SELECT DISTINCT core_learning_group FROM view_teacher_core_groups WHERE core_learning_group IS NOT NULL AND core_learning_group != '' COLLATE utf8mb4_general_ci ORDER BY core_learning_group ASC";
     $result_groups = $conn->query($sql_groups);
 
 
@@ -80,7 +80,7 @@
                    <?php require_once 'forms/form_selector.php'; ?>
                </div>
                <div class="col-auto">
-                   <button type="submit" class="btn btn-success btn-lg">
+                   <button type="submit" class="btn btn-success btn-lg" onclick="return validateSelection();">
                        ดำเนินการต่อ
                    </button>
                </div>
@@ -124,10 +124,22 @@
 
            function validateSelection() {
                const supervisorName = document.getElementById('supervisor_name').value.trim();
-               const teacherName = document.getElementById('teacher_name_input').value.trim();
+               const teacherNameInput = document.getElementById('teacher_name_input');
+               const teacherName = teacherNameInput.value.trim();
+               const formSelected = document.querySelector('input[name="evaluation_type"]:checked');
 
-               if (supervisorName === '' || teacherName === '') {
-                   alert('โปรดเลือกข้อมูลผู้นิเทศและผู้รับนิเทศให้ครบถ้วนก่อนดำเนินการต่อ');
+               if (supervisorName === '') {
+                   alert('กรุณาเลือกชื่อผู้นิเทศ');
+                   return false; // หยุดการส่งฟอร์ม
+               }
+
+               // ตรวจสอบว่าค่าใน input ตรงกับ option ใน datalist หรือไม่
+               const dataListOptions = document.getElementById('teacher_names_list').options;
+               const isValidTeacher = Array.from(dataListOptions).some(option => option.value === teacherName);
+
+               if (teacherName === '' || !isValidTeacher) {
+                   alert('กรุณาเลือกชื่อผู้รับนิเทศจากรายการที่มีอยู่');
+                   teacherNameInput.focus(); // ย้ายโฟกัสกลับไปที่ input
                    return false; // หยุดการส่งฟอร์ม
                }
 
@@ -137,9 +149,8 @@
                // const formSelected = document.querySelector('input[name="evaluation_type"]:checked');
                // if (!formSelected) {
                //     alert('โปรดเลือกแบบฟอร์มประเมินก่อนดำเนินการต่อ');
-               //     return false;
-               // }
-
+                //     return false;
+                // }
                return true; // อนุญาตให้ส่งฟอร์ม
            }
            // ⭐️ สิ้นสุดฟังก์ชัน validateSelection() ⭐️

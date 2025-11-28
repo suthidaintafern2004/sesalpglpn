@@ -11,11 +11,11 @@ $is_supervisor = isset($_SESSION['is_logged_in']) && $_SESSION['is_logged_in'] =
 
 // 1. ตรวจสอบว่ามี teacher_pid ส่งมาหรือไม่
 // ⭐️ แก้ไข: เปลี่ยนจาก $_GET เป็น $_POST ⭐️
-if (!isset($_POST['teacher_pid']) || empty($_POST['teacher_pid'])) {
+if (!isset($_REQUEST['teacher_pid']) || empty($_REQUEST['teacher_pid'])) {
     die("ไม่พบรหัสประจำตัวผู้รับการนิเทศ");
 }
 
-$teacher_pid = $_POST['teacher_pid']; // ⭐️ แก้ไข: เปลี่ยนจาก $_GET เป็น $_POST ⭐️
+$teacher_pid = $_REQUEST['teacher_pid']; // ⭐️ แก้ไข: เปลี่ยนจาก $_POST เป็น $_REQUEST เพื่อรองรับทั้ง GET และ POST
 $results = [];
 $teacher_info = null;
 
@@ -137,10 +137,9 @@ $conn->close();
                                     <td>
                                         <?php // ปุ่มดูรายงาน 
                                         ?>
-                                        <form method="POST" action="supervision_report.php" style="display:inline;">
-                                            <input type="hidden" name="session_id" value="<?php echo $row['session_id']; ?>">
-                                            <button type="submit" class="btn btn-sm btn-primary" title="ดูรายงานผลการนิเทศ"><i class="fas fa-file-alt"></i> ดูรายงาน</button>
-                                        </form>
+                                        <a href="supervision_report.php?session_id=<?php echo $row['session_id']; ?>" class="btn btn-sm btn-primary" title="ดูรายงานผลการนิเทศ">
+                                            <i class="fas fa-file-alt"></i> ดูรายงาน
+                                        </a>
                                     </td>
                                     <?php if (!$is_supervisor): // ⭐️ ถ้าไม่ใช่ผู้นิเทศ ให้แสดงคอลัมน์ประเมิน 
                                     ?>

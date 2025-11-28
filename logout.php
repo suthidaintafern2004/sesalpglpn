@@ -1,15 +1,22 @@
-// ไฟล์: auth/logout.php
-
 <?php
-session_start();
+session_start(); // เริ่มต้น session
 
-// ลบข้อมูลทั้งหมดใน Session
-session_unset();
+// 1. ลบตัวแปร session ทั้งหมด
+$_SESSION = array();
 
-// ทำลาย Session
+// 2. ลบ session cookie
+if (ini_get("session.use_cookies")) {
+    $params = session_get_cookie_params();
+    setcookie(session_name(), '', time() - 42000,
+        $params["path"], $params["domain"],
+        $params["secure"], $params["httponly"]
+    );
+}
+
+// 3. ทำลาย session
 session_destroy();
 
-// ส่งผู้ใช้กลับไปยังหน้าประวัติ (history.php)
-// ⭐️ แก้ไขตรงนี้: จาก header("Location: login.php");
-header("Location: history.php"); 
+// 4. Redirect กลับไปหน้าหลัก
+header("Location: index.php");
 exit();
+?>

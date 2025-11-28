@@ -90,50 +90,36 @@ body {
 /* สไตล์สำหรับการพิมพ์ (Print Styles) */
 /* -------------------------------------- */
 
-/* -------------------------------------- */
-/* ปิดผลกระทบ Header/Footer ในหน้า Print */
-/* -------------------------------------- */
-
 @media print {
     @page {
-        size: A4;
-        margin: 0 !important;   /* ดัน header/footer ออกนอกหน้ากระดาษ */
+        size: auto;
+        margin: 15mm;
     }
-
-    html, body {
-        margin: 0 !important;
-        padding: 0 !important;
-        background: #ffffff !important;
-        -webkit-print-color-adjust: exact !important;
-        color-adjust: exact !important;
+    * {
+        -webkit-print-color-adjust: exact !important; 
+        color-adjust: exact !important; 
     }
-
-    /* เอาเงา/ขอบ/ระยะขาวของ container ออกทั้งหมด */
-    .report-container {
-        width: 100% !important;
-        max-width: 100% !important;
-        margin: 0 !important;
-        padding: 20mm !important; /* ใช้ padding แทน margin (เพื่อเว้นขอบเหมือนเดิม) */
-        box-shadow: none !important;
-        border-radius: 0 !important;
-        background: white !important;
+    body {
+        font-size: 12px;
+        background: #fff;
     }
-
-    /* ปิดส่วนที่ไม่ต้องพิมพ์ */
-    .no-print {
-        display: none !important;
+    .container, .report-container {
+        width: 100%;
+        max-width: 100%;
+        margin: 0;
+        padding: 0;
+        box-shadow: none;
     }
-
-    /* ปรับภาพในโหมดพิมพ์ */
+    .no-print { display: none; }
     .image-gallery-print {
         display: flex;
         flex-wrap: wrap;
-        gap: 10px;
+        gap: 15px;
         page-break-inside: avoid;
     }
     .image-item-print img {
-        max-width: 260px;
-        max-height: 260px;
+        max-width: 300px;
+        max-height: 300px;
         border: 1px solid #ccc;
     }
 }

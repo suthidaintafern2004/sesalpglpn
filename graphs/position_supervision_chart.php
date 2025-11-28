@@ -13,7 +13,7 @@
                 <canvas id="positionSupervisionChart"></canvas>
             </div>
             <div class="col-lg-6">
-                <h5 class="card-title text-center mb-3">ตารางสรุปข้อมูลดิบ</h5>
+                <h5 class="card-title text-center mb-3">ตารางสรุปข้อมูล</h5>
                 <div class="table-responsive">
                     <table class="table table-striped table-hover table-bordered">
                         <thead class="table-success">

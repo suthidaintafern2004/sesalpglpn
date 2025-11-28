@@ -43,7 +43,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $_SESSION['is_logged_in'] = true;
 
         // ส่งผู้ใช้ไปยังหน้าหลักของระบบ (เช่น index.php หรือ kpi_form.php)
-        header("Location: history.php"); // <-- เปลี่ยนเป็นหน้าที่ต้องการ
+        header("Location: index.php"); // <-- เปลี่ยนเป็นหน้าที่ต้องการ
         exit();
     } else {
         // --- ไม่พบผู้ใช้ในระบบ ---

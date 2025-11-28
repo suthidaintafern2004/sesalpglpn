@@ -53,6 +53,10 @@ if (!empty($search_name)) {
 // ⭐️ เรียงลำดับจากวันที่ล่าสุด ⭐️
 $sql .= " ORDER BY latest_sessions.max_date DESC";
 
+// ⭐️ จำกัดผลลัพธ์ให้แสดง 5 รายการล่าสุดเฉพาะเมื่อไม่ได้ค้นหา ⭐️
+if (empty($search_name)) {
+    $sql .= " LIMIT 5";
+}
 
 // เตรียมและดำเนินการสอบถาม
 $stmt = $conn->prepare($sql);
@@ -116,7 +120,7 @@ $conn->close();
             <?php if (isset($_SESSION['is_logged_in']) && $_SESSION['is_logged_in'] === true): ?>
                 <div class="d-flex justify-content-end align-items-center mb-3 gap-2">
                     <!-- ส่วนของผู้นิเทศ (เมื่อล็อกอิน) -->
-                    <a href="index.php" class="btn btn-success">
+                    <a href="supervision_start.php" class="btn btn-success">
                         <i class="fas fa-plus-circle"></i> บันทึกการนิเทศ
                     </a>
                     <a href="graphs/satisfaction_dashboard.php" class="btn btn-info">
@@ -162,12 +166,9 @@ $conn->close();
                                         <?php echo htmlspecialchars($row['supervision_count']); ?>
                                     </td>
                                     <td class="text-center">
-                                        <form method="POST" action="session_details.php" style="display:inline;">
-                                            <input type="hidden" name="teacher_pid" value="<?php echo $row['teacher_t_pid']; ?>">
-                                            <button type="submit" class="btn btn-sm btn-info" title="ดูประวัติการนิเทศทั้งหมดของครูท่านนี้">
-                                                <i class="fas fa-search-plus"></i>
-                                            </button>
-                                        </form>
+                                        <a href="session_details.php?teacher_pid=<?php echo $row['teacher_t_pid']; ?>" class="btn btn-sm btn-info" title="ดูประวัติการนิเทศทั้งหมดของครูท่านนี้">
+                                            <i class="fas fa-search-plus"></i>
+                                        </a>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>

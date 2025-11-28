@@ -39,6 +39,21 @@ if ($result) {
 
 // ดึงข้อมูลจาก Session มาใช้
 $inspection_data = $_SESSION['inspection_data'] ?? [];
+
+// ⭐️ ดึงข้อมูลครั้งที่นิเทศที่เคยถูกประเมินไปแล้วของอาจารย์คนนี้
+$used_times = [];
+if (isset($inspection_data['t_pid'])) {
+    $t_pid = $inspection_data['t_pid'];
+    // เตรียม Query เพื่อดึงครั้งที่นิเทศที่เคยมีอยู่แล้ว
+    $stmt_check = $conn->prepare("SELECT inspection_time FROM supervision_sessions WHERE teacher_t_pid = ?");
+    $stmt_check->bind_param("s", $t_pid);
+    $stmt_check->execute();
+    $result_check = $stmt_check->get_result();
+    while ($row_check = $result_check->fetch_assoc()) {
+        $used_times[] = $row_check['inspection_time'];
+    }
+    $stmt_check->close();
+}
 ?>
 <!-- ไม่ต้องมี <html> <head> <body> เพราะไฟล์นี้จะถูก include -->
 
@@ -74,8 +89,13 @@ $inspection_data = $_SESSION['inspection_data'] ?? [];
       <label for="inspection_time" class="form-label fw-bold">ครั้งที่นิเทศ</label>
       <select id="inspection_time" name="inspection_time" class="form-select" required>
         <option value="" disabled selected>-- เลือกครั้งที่นิเทศ --</option>
-        <?php for ($i = 1; $i <= 9; $i++): ?>
-          <option value="<?php echo $i; ?>"><?php echo $i; ?></option>
+        <?php for ($i = 1; $i <= 9; $i++): 
+            $is_disabled = in_array($i, $used_times);
+            $option_text = $i . ($is_disabled ? ' (ประเมินแล้ว)' : '');
+        ?>
+          <option value="<?php echo $i; ?>" <?php echo $is_disabled ? 'disabled' : ''; ?>>
+            <?php echo $option_text; ?>
+          </option>
         <?php endfor; ?>
       </select>
     </div>
