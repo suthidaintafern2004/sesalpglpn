@@ -198,11 +198,16 @@ if (isset($inspection_data['t_pid'])) {
       </div>
   </div>
 
-  <div class="d-flex justify-content-center my-4">
-    <button type="submit" class="btn btn-success fs-5 btn-hover-blue px-4 py-2">
-      บันทึกข้อมูล
-    </button>
-  </div>
+    <!-- ⭐️ แก้ไข: เพิ่มปุ่มย้อนกลับ และจัดวางปุ่มใหม่ -->
+    <div class="d-flex justify-content-center gap-3 my-4">
+        <button type="button" onclick="window.history.back()" class="btn btn-secondary fs-5 px-4 py-2">
+            <i class="fas fa-arrow-left"></i> ย้อนกลับ
+        </button>
+        <button type="submit" class="btn btn-success fs-5 px-4 py-2">
+            <i class="fas fa-save"></i> บันทึกข้อมูล
+        </button>
+    </div>
+    <!-- ⭐️ สิ้นสุดการแก้ไข ⭐️ -->
 </form>
 
 <style>

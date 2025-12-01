@@ -4,10 +4,17 @@ session_start(); // ⭐️ เริ่ม session เพื่อใช้แ�
 require_once 'config/db_connect.php';
 
 // ตรวจสอบค่า session_id
-if (!isset($_REQUEST['session_id']) || empty($_REQUEST['session_id'])) { // ⭐️ ใช้ $_REQUEST เพื่อรับทั้ง GET และ POST
+// ⭐️ เปลี่ยนมาใช้ session เป็นหลักในการรับค่า session_id
+if (isset($_REQUEST['session_id']) && !empty($_REQUEST['session_id'])) {
+    // ถ้ามีการส่ง session_id มาใน URL (เช่น จากลิงก์เก่า) ให้ใช้ค่านั้นและเก็บลง session
+    $_SESSION['report_session_id'] = intval($_REQUEST['session_id']);
+    // Redirect ไปที่หน้าเดิมแบบไม่มี query string เพื่อซ่อน session_id จาก URL
+    header('Location: supervision_report.php');
+    exit();
+} elseif (!isset($_SESSION['report_session_id']) || empty($_SESSION['report_session_id'])) {
     die("ไม่พบรหัสการนิเทศ");
 }
-$session_id = intval($_REQUEST['session_id']);
+$session_id = $_SESSION['report_session_id'];
 
 // --- ส่วนจัดการการลบรูปภาพ (เพิ่มเข้ามาใหม่) ---
 $uploadDir = 'uploads/';
@@ -40,7 +47,7 @@ if (isset($_GET['delete_image'])) {
         }
     }
     // Redirect กลับมาที่หน้ารายงานเดิมเพื่อเคลียร์ query string
-    header("Location: supervision_report.php?session_id=" . $session_id);
+    header("Location: supervision_report.php");
     exit();
 }
 
@@ -270,48 +277,14 @@ while ($row = $result_images->fetch_assoc()) {
                 </div>
             <?php endif; ?>
 
-            <!-- ⭐️ ปุ่มสำหรับเลื่อนลงล่างสุด (สไตล์ Bootstrap 5) ⭐️
-            <button onclick="scrollToBottom()" class="btn btn-primary rounded-pill position-fixed bottom-0 end-0 m-3 shadow" title="เลื่อนลงล่างสุด" style="z-index: 99;">
-                <i class="fas fa-arrow-down"></i>
-            </button>
-
-            ⭐️ [ตัวเลือกเสริม] ปุ่มสำหรับเลื่อนขึ้นบนสุด (สไตล์ Bootstrap 5) ⭐️ 
-            <button onclick="scrollToTop()" id="scrollToTopBtn" class="btn btn-secondary rounded-pill position-fixed bottom-0 end-0 m-3 shadow" title="เลื่อนขึ้นบนสุด" style="z-index: 99; margin-bottom: 80px !important; display: none;">
-                <i class="fas fa-arrow-up"></i>
-            </button> -->
-
             <div class="text-center mt-5 no-print">
-                <!-- ปุ่มย้อนกลับ: เปลี่ยนเป็นลิงก์ GET ไปยัง session_details.php -->
-                <a href="session_details.php?teacher_pid=<?php echo htmlspecialchars($info['teacher_t_pid']); ?>" class="btn btn-secondary me-2">
-                    <i class="fas fa-chevron-left"></i> ย้อนกลับ</a>
-                <button onclick="window.print()" class="btn btn-primary"><i class="fas fa-print"></i> พิมพ์รายงาน</button>
+                <a href="history.php" class="btn btn-secondary me-2"><i class="fas fa-list-alt"></i> กลับไปหน้าประวัติ</a>
+                <button onclick="window.print()" class="btn btn-secondary"><i class="fas fa-print"></i> พิมพ์รายงาน</button>
             </div>
 
         </div>
     </div>
 
-    <script>
-        // ⭐️ ฟังก์ชันสำหรับเลื่อนลงล่างสุดแบบทันที ⭐️
-        function scrollToBottom() {
-            window.scrollTo(0, document.body.scrollHeight);
-        }
-
-        // ⭐️ ฟังก์ชันสำหรับเลื่อนขึ้นบนสุดแบบทันที ⭐️
-        function scrollToTop() {
-            window.scrollTo(0, 0);
-        }
-
-        // ⭐️ ฟังก์ชันสำหรับแสดง/ซ่อนปุ่มเลื่อนขึ้นบนสุด ⭐️
-        window.onscroll = function() {
-            // ถ้าเลื่อนลงมามากกว่า 100px จากด้านบนสุด ให้แสดงปุ่ม
-            if (document.body.scrollTop > 100 || document.documentElement.scrollTop > 100) {
-                scrollToTopBtn.style.display = "block";
-            } else {
-                // ถ้าน้อยกว่า ก็ซ่อนปุ่ม
-                scrollToTopBtn.style.display = "none";
-            }
-        };
-    </script>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>

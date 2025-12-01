@@ -57,14 +57,15 @@ if (!$inspection_data) {
             <i class="fas fa-check-circle"></i> <span class="fw-bold">แบบบันทึกข้อมูลการนิเทศ</span>
         </div>
         <div class="card-body">
+            <div class="d-flex justify-content-start mb-3">
+                <a href="index.php" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> ย้อนกลับ</a>
+            </div>
             <?php if ($error_message !== ''): ?>
                 <div class="alert alert-danger text-center">
                     <p><?php echo $error_message; ?></p>
-                    <a href="index.php" class="btn btn-danger">ไปยังแบบฟอร์มเริ่มต้น</a>
                 </div>
             <?php else: ?>
                 <?php
-                // รวมฟอร์ม KPI ทั้งหมดเข้ามาแสดงผลในหน้านี้
                 include 'forms/kpi_form.php';
                 ?>
             <?php endif; ?>

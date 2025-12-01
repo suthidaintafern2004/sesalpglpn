@@ -145,10 +145,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             }
         }
 
-        // เปลี่ยนเส้นทางกลับไปหน้าหลัก (index.php) พร้อมข้อความแจ้งเตือน
-        // ตามคำขอ: เมื่อบันทึก kpi_form แล้วให้เด้งไปหน้า index
-        $_SESSION['flash_message'] = "บันทึกข้อมูลการนิเทศ (KPI) เรียบร้อยแล้ว";
-        header("Location: index.php");
+        // ⭐️ ตั้งค่าข้อความแจ้งเตือนสำหรับแสดงผลในหน้า history.php
+        $_SESSION['flash_message'] = 'บันทึกข้อมูลการนิเทศเรียบร้อยแล้ว';
+
+        // ⭐️ เปลี่ยนเส้นทางไปยังหน้าประวัติ (history.php)
+        header("Location: history.php");
         exit();
 
     } catch (Exception $e) {

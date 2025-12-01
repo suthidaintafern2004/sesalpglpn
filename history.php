@@ -166,9 +166,12 @@ $conn->close();
                                         <?php echo htmlspecialchars($row['supervision_count']); ?>
                                     </td>
                                     <td class="text-center">
-                                        <a href="session_details.php?teacher_pid=<?php echo $row['teacher_t_pid']; ?>" class="btn btn-sm btn-info" title="ดูประวัติการนิเทศทั้งหมดของครูท่านนี้">
-                                            <i class="fas fa-search-plus"></i>
-                                        </a>
+                                        <form method="POST" action="session_details.php" style="display:inline;">
+                                            <input type="hidden" name="teacher_pid" value="<?php echo $row['teacher_t_pid']; ?>">
+                                            <button type="submit" class="btn btn-sm btn-info" title="ดูประวัติการนิเทศทั้งหมดของครูท่านนี้">
+                                                <i class="fas fa-search-plus"></i>
+                                            </button>
+                                        </form>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>

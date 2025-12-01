@@ -17,14 +17,16 @@ $results = []; // ⭐️ เตรียม array สำหรับเก็บ
 // --- START: ดึงข้อมูลสำหรับ Dashboard ที่จะส่งให้ learning_group_chart.php ---
 // ⭐️ SQL สำหรับดึงข้อมูลจำนวนครูที่ถูกนิเทศในแต่ละกลุ่มสาระฯ
 $sql_lg_supervision = "
-    SELECT 
-        t.learning_group,
+    SELECT
+        vtcg.core_learning_group AS learning_group,
         COUNT(DISTINCT ss.teacher_t_pid) AS supervised_teacher_count
-    FROM supervision_sessions ss
-    JOIN teacher t ON ss.teacher_t_pid = t.t_pid
-    WHERE t.learning_group IS NOT NULL AND t.learning_group != ''
-    GROUP BY t.learning_group
-    ORDER BY supervised_teacher_count DESC;
+    FROM
+        supervision_sessions ss
+    JOIN
+        view_teacher_core_groups vtcg ON ss.teacher_t_pid = vtcg.t_pid
+    WHERE vtcg.core_learning_group IS NOT NULL AND vtcg.core_learning_group COLLATE utf8mb4_unicode_ci != ''
+    GROUP BY vtcg.core_learning_group
+    ORDER BY supervised_teacher_count DESC
 ";
 
 $lg_supervision_data = []; // กำหนดค่าเริ่มต้นเป็น array ว่าง
@@ -117,7 +119,7 @@ $conn->close();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบนิเทศศึกษา</title>
+    <title>ประวัติการนิเทศ</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <!-- ⭐️ เพิ่ม Chart.js และ Datalabels Plugin -->
@@ -223,9 +225,12 @@ $conn->close();
                                         <?php echo htmlspecialchars($row['supervision_count']); ?>
                                     </td>
                                     <td class="text-center">
-                                        <a href="session_details.php?teacher_pid=<?php echo $row['teacher_t_pid']; ?>" class="btn btn-sm btn-info" title="ดูประวัติการนิเทศทั้งหมดของครูท่านนี้">
-                                            <i class="fas fa-search-plus"></i>
-                                        </a>
+                                        <form method="POST" action="session_details.php" style="display:inline;">
+                                            <input type="hidden" name="teacher_pid" value="<?php echo $row['teacher_t_pid']; ?>">
+                                            <button type="submit" class="btn btn-sm btn-info" title="ดูประวัติการนิเทศทั้งหมดของครูท่านนี้">
+                                                <i class="fas fa-search-plus"></i>
+                                            </button>
+                                        </form>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>

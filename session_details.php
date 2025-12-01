@@ -11,11 +11,11 @@ $is_supervisor = isset($_SESSION['is_logged_in']) && $_SESSION['is_logged_in'] =
 
 // 1. ตรวจสอบว่ามี teacher_pid ส่งมาหรือไม่
 // ⭐️ แก้ไข: เปลี่ยนจาก $_GET เป็น $_POST ⭐️
-if (!isset($_REQUEST['teacher_pid']) || empty($_REQUEST['teacher_pid'])) {
+if (!isset($_POST['teacher_pid']) || empty($_POST['teacher_pid'])) {
     die("ไม่พบรหัสประจำตัวผู้รับการนิเทศ");
 }
 
-$teacher_pid = $_REQUEST['teacher_pid']; // ⭐️ แก้ไข: เปลี่ยนจาก $_POST เป็น $_REQUEST เพื่อรองรับทั้ง GET และ POST
+$teacher_pid = $_POST['teacher_pid']; // ⭐️ แก้ไข: เปลี่ยนจาก $_GET เป็น $_POST ⭐️
 $results = [];
 $teacher_info = null;
 

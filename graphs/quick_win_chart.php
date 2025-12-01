@@ -22,7 +22,7 @@ if (!isset($dashboard_data) || empty($dashboard_data)) {
 
             <!-- ส่วนของตารางข้อมูล -->
             <div class="col-lg-6">
-                <h5 class="card-title text-center mb-3">ตารางสรุปข้อมูล</h5>
+                <h5 class="card-title text-center mb-3">ตารางสรุปข้อมูลดิบ</h5>
                 <table class="table table-striped table-hover table-bordered">
                     <thead class="table-primary" style="background-color: #6f42c1; color: white;">
                         <tr class="text-center">

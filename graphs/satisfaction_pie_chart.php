@@ -16,7 +16,7 @@
 
             <!-- ส่วนของตารางข้อมูล (ย้ายขึ้นมาข้างกราฟ) -->
             <div class="col-lg-6">
-                <h5 class="card-title text-center mb-3">ตารางสรุปข้อมูล</h5>
+                <h5 class="card-title text-center mb-3">ตารางสรุปข้อมูลดิบ</h5>
                 <div class="table-responsive">
                     <table class="table table-striped table-hover">
                         <thead class="table-info">
